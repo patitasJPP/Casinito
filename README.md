@@ -1,229 +1,269 @@
-# 🎰 CASINO SAPIENS
+# ◆ CASINO SAPIENS — Sistema Experto de Perfilado para Casino
 
-> Sistema Experto de Perfilado y Recomendación para Casino
-> Proyecto Universitario — Prolog + Python
+**Universidad:** [Nombre de la universidad]  
+**Curso:** [Nombre del curso]  
+**Integrantes:** [Nombres de los integrantes]  
+**Fecha:** Junio 2026  
 
 ---
 
-## 📋 CONTEXTO COMPLETO DEL PROYECTO
+## 📖 Introducción
 
-### 1. Visión General
+Los casinos manejan grandes volúmenes de jugadores con perfiles, comportamientos y necesidades muy distintas. Clasificarlos manualmente es ineficiente y propenso a errores. **Casino Sapiens** es un sistema experto multiparadigma que automatiza la clasificación de jugadores usando un motor de inferencia en Prolog y un dashboard interactivo en Python, demostrando la integración de los paradigmas lógico, funcional y orientado a objetos.
 
-Casino virtual inteligente donde **Prolog** funciona como motor de inferencia (gerente inteligente) que clasifica jugadores y recomienda acciones, mientras **Python** muestra los resultados en un dashboard para empleados.
+---
 
-**Filosofía:** Toda la lógica e inteligencia está en Prolog. Python solo es la interfaz visual.
+## 🎯 Objetivos
 
-### 2. Decisión de Arquitectura
+### General
+Desarrollar un sistema experto multiparadigma que clasifique jugadores de casino en categorías (VIP, Retener, Cuidar, Servicio Rápido) y recomiende acciones personalizadas, integrando Prolog como motor de inferencia y Python como interfaz de visualización.
 
-Originalmente se planteó un casino con juegos interactivos (tragamonedas, ruleta, blackjack) donde Python mostraba menús y Prolog recomendaba en vivo. Se decidió simplificar a:
+### Específicos
+1. Implementar una base de hechos en Prolog con 8 jugadores y 30 campos descriptivos cada uno.
+2. Codificar 22+ reglas de inferencia en Prolog para clasificación y recomendación.
+3. Diseñar un dashboard profesional en Python con tkinter y tema oscuro premium.
+4. Integrar ambos lenguajes mediante pyswip para que Python consulte a Prolog en tiempo real.
+5. Aplicar análisis de datos con pandas y numpy sobre los perfiles de jugadores.
+6. Incorporar programación funcional (map, filter, reduce, comprehensions) en el pipeline de datos.
+7. Generar visualizaciones y pruebas unitarias que validen el comportamiento del sistema.
 
-- **Prolog:** Contiene datos fijos de jugadores (30 campos c/u) + 25+ reglas de inferencia
-- **Python:** Solo consulta a Prolog via pyswip y muestra resultados bonitos para empleados
-- **Sin login, sin formularios, sin datos en tiempo real** — todo es estático por ahora
+---
 
-### 3. Datos por Jugador (30 campos)
+## 📐 Marco Teórico
 
-Organizados en 6 grupos:
+### Paradigmas de Programación
 
-**Identificación:** id, nombre, edad, ocupacion
-**Sesión Actual:** juego_actual, monto_apuesta, resultado_ultima_ronda, rondas_jugadas_hoy, tiempo_en_casino_hoy, hora_actual
-**Económico:** presupuesto_hoy, fichas_actuales, gasto_hoy, gasto_promedio_ronda, gasto_maximo_historico, perdidas_acumuladas, ganancias_acumuladas
-**Comportamiento:** prefiere_azar_o_estrategia, prefiere_rapido_o_lento, cambia_al_perder, cambia_al_ganar, juega_solo, reinvierte_ganancias, acepta_recomendaciones
-**Historial de Visitas:** frecuencia_semanal, tiempo_promedio_visita, horario_habitual, dias_visita, total_visitas, dias_desde_primera_visita, dias_desde_ultima_visita
-**Preferencias:** juego_favorito, variedad_juegos_probados
+| Paradigma | Lenguaje | Aplicación en el proyecto |
+|---|---|---|
+| **Lógico / Declarativo** | Prolog | Hechos, reglas, unificación, backtracking, findall |
+| **Funcional** | Python | map, filter, reduce, lambda, list comprehensions |
+| **Orientado a Objetos** | Python | Clases, herencia (PanelBase), encapsulamiento |
 
-### 4. Clasificaciones de Jugadores (5 tipos)
+### Herramientas
 
-| Clasificación | Significado | Acción |
+| Herramienta | Versión | Propósito |
+|---|---|---|
+| SWI-Prolog | 9.x | Motor de inferencia lógica |
+| Python | 3.13+ | Dashboard y análisis |
+| pyswip | 0.3+ | Puente Python ↔ Prolog |
+| pandas | 2.x | Análisis y transformación de datos |
+| numpy | 1.x | Cálculos estadísticos y percentiles |
+| tkinter | — | Interfaz gráfica de usuario |
+| pytest | 8.x | Pruebas unitarias |
+
+### Conceptos Clave
+
+- **Hechos Prolog**: Predicados con argumentos que representan datos inmutables (`jugador/4`, `economia/8`).
+- **Reglas**: Cláusulas `:-` que definen condiciones lógicas para inferir nuevas verdades.
+- **Unificación**: Mecanismo de matching de patrones de Prolog.
+- **findall**: Meta-predicado que recolecta todas las soluciones de una consulta.
+- **map/filter/reduce**: Funciones de orden superior del paradigma funcional.
+- **pandas groupby**: Agregación de datos por categorías.
+
+---
+
+## 🏗️ Diseño del Sistema
+
+### Arquitectura
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                     PROLOG (cerebro)                     │
+│  ┌──────────┐  ┌──────────┐  ┌──────────────────────┐  │
+│  │ hechos.pl │  │ reglas_*.│  │ casino.pl            │  │
+│  │ 8 jug.    │  │ pl       │  │ (meta-predicados,    │  │
+│  │ 30 campos │  │ VIP,     │  │  findall, consultas) │  │
+│  │ c/u       │  │ Retener, │  │                      │  │
+│  │           │  │ Cuidar,  │  │                      │  │
+│  │           │  │ Recom.   │  │                      │  │
+│  └──────────┘  └──────────┘  └──────────────────────┘  │
+└────────────────────┬────────────────────────────────────┘
+                     │ pyswip
+                     ▼
+┌─────────────────────────────────────────────────────────┐
+│                     PYTHON (cara)                        │
+│  ┌──────────┐  ┌──────────┐  ┌──────────────────────┐  │
+│  │consultas │  │ data/    │  │ ui/                  │  │
+│  │.py       │  │ jugadores│  │ panel_base.py        │  │
+│  │(puente)  │  │ analisis │  │ panel_dashboard.py   │  │
+│  │          │  │ .py      │  │ panel_*.py           │  │
+│  │          │  │ (pandas, │  │ (tkinter)            │  │
+│  │          │  │  numpy,  │  │                      │  │
+│  │          │  │  func.)  │  │                      │  │
+│  └──────────┘  └──────────┘  └──────────────────────┘  │
+└─────────────────────────────────────────────────────────┘
+```
+
+### Módulos de Prolog
+
+| Archivo | Contenido |
+|---|---|
+| `hechos.pl` | 8 jugadores × 6 predicados (30 campos c/u) |
+| `reglas_vip.pl` | 5 reglas: frecuencia, gasto, ganancias, antigüedad, edad |
+| `reglas_retener.pl` | 5 reglas: inactividad, caída frecuencia, pérdidas, perfil |
+| `reglas_detener.pl` | 5 reglas: edad, tiempo excesivo, presupuesto, pérdidas, solitario |
+| `reglas_recomendar.pl` | 8 reglas: combinaciones azar/estrategia × rápido/lento |
+| `casino.pl` | Meta-predicados findall + datos_jugador/32 |
+
+### Módulos de Python
+
+| Módulo | Responsabilidad |
+|---|---|
+| `main.py` | Punto de entrada |
+| `config.py` | Colores, constantes |
+| `consultas.py` | Puente pyswip (Prolog → Python) |
+| `data/jugadores.py` | Datos de jugadores (desde Prolog o mock) |
+| `data/analisis.py` | pandas, numpy, map/filter/reduce |
+| `ui/panel_base.py` | Clase base con utilidades compartidas |
+| `ui/panel_dashboard.py` | KPIs, barras de distribución, resumen financiero |
+| `ui/panel_todos.py` | Tabla + detalle expandible con 30 campos |
+| `ui/panel_vip.py` | Invitaciones VIP |
+| `ui/panel_retener.py` | Bonos de retorno |
+| `ui/panel_cuidar.py` | Alertas y supervisión |
+| `ui/panel_rapido.py` | Atención prioritaria |
+| `ui/panel_estadisticas.py` | Análisis descriptivo, groupby, correlaciones |
+| `tests/test_clasificaciones.py` | 16 pruebas unitarias |
+
+### Datos por Jugador (30 campos)
+
+Organizados en 6 grupos funcionales:
+
+1. **Identificación**: id, nombre, edad, ocupacion
+2. **Económico**: presupuesto_hoy, fichas_actuales, gasto_hoy, gasto_promedio_ronda, gasto_maximo_historico, perdidas_acumuladas, ganancias_acumuladas
+3. **Comportamiento**: prefiere_azar_o_estrategia, prefiere_rapido_o_lento, cambia_al_perder, cambia_al_ganar, juega_solo, reinvierte_ganancias, acepta_recomendaciones
+4. **Sesión Actual**: juego_actual, monto_apuesta, resultado_ultima_ronda, rondas_jugadas_hoy, tiempo_en_casino_hoy, hora_actual
+5. **Historial de Visitas**: frecuencia_semanal, tiempo_promedio_visita, horario_habitual, dias_visita, total_visitas, dias_desde_primera_visita, dias_desde_ultima_visita
+6. **Preferencias**: juego_favorito, variedad_juegos_probados
+
+### Clasificaciones
+
+| Tipo | Descripción | Acción |
 |---|---|---|
 | VIP | Alto valor, viene seguido, gasta bien | Invitar a eventos exclusivos |
-| Retener | Dejó de venir, riesgo de pérdida | Ofrecer bono de retorno |
-| Cuidar | Gasta mucho, muy joven, muchas horas | Sugerir descanso, monitorear |
-| Servicio_Rápido | Prefiere ritmo rápido, poco tiempo | Atender con prioridad |
-| *(normal)* | Sin clasificación especial | Seguimiento normal |
-
-### 5. Reglas Pendientes en Prolog (25+)
-
-Faltan implementar en los archivos `.pl`:
-
-**VIP (5+ reglas):** frecuencia ≥ 3x/sem, gasto max historico ≥ 100, ganancias acumuladas altas, antigüedad > 1 año, trajo referidos
-**Retener (5+ reglas):** días desde última visita > 30, frecuencia disminuyó, pérdidas acumuladas altas, antes venía seguido
-**Cuidar (5+ reglas):** edad < 25, tiempo en casino ≥ 4hrs, gasto_hoy ≥ 80% presupuesto, pérdidas >> ganancias
-**Recomendar (10+ reglas):** azar→tragamonedas/ruleta, estrategia→blackjack, rápido→tragamonedas, lento→ruleta/blackjack, etc.
+| Retener | Dejó de venir o riesgo de pérdida | Ofrecer bono de retorno |
+| Cuidar | Edad joven, tiempo excesivo, pérdidas altas | Sugerir descanso, monitorear |
+| Servicio Rápido | Ritmo rápido, visitas cortas, presupuesto alto | Atender con prioridad |
 
 ---
 
-## 🗂️ ESTRUCTURA ACTUAL DE ARCHIVOS
+## 💻 Implementación
 
-```
-C:\Users\yalli\OneDrive\Desktop\casino_sapiens/
-│
-├── README.md                      ← Este archivo (contexto completo)
-│
-├── python/                        ← TODO FUNCIONAL
-│   ├── ventana_usuarios.py        ← Dashboard completo con 5 paneles
-│   ├── main.py                    ← (vacío - pendiente)
-│   ├── consultas.py               ← (vacío - pendiente de conectar pyswip)
-│   ├── ventana_vip.py             ← (vacío - pendiente)
-│   ├── ventana_retener.py         ← (vacío - pendiente)
-│   ├── ventana_detener.py         ← (vacío - pendiente)
-│   └── ventana_recomendar.py      ← (vacío - pendiente)
-│
-└── prolog/                        ← TODO VACÍO (pendiente de escribir)
-    ├── casino.pl                  ← Archivo principal (consulta módulos)
-    ├── hechos.pl                  ← 30 datos x 6+ jugadores de prueba
-    ├── reglas_vip.pl              ← Reglas: clientes VIP
-    ├── reglas_retener.pl          ← Reglas: clientes en riesgo
-    ├── reglas_detener.pl          ← Reglas: jugadores a detener/cuidar
-    └── reglas_recomendar.pl       ← Reglas: qué juego recomendar
-```
+### Fragmento clave — Regla VIP en Prolog
 
----
-
-## ✅ LO QUE ESTÁ HECHO
-
-### Software Instalado
-| Herramienta | Versión | Ruta |
-|---|---|---|
-| Python 3 | 3.13.3 | `C:\Users\yalli\AppData\Local\Programs\Python\Python313\python.exe` |
-| pip | 25.0.1 | Viene con Python |
-| pyswip | 0.3.3 | `pip install pyswip` |
-| SWI-Prolog | 9.2.9 | `C:\Users\yalli\AppData\Local\Programs\SWI-Prolog\bin\swipl.exe` |
-| Git | 2.54.0 | Ya venía instalado |
-
-### Fix aplicado
-Se reordenó el PATH de usuario para que Python real esté antes que `WindowsApps` (los stubs de Microsoft Store). Si `python --version` no funciona, ejecutar:
-```powershell
-$env:Path = [Environment]::GetEnvironmentVariable("Path", "User") + ";" + [Environment]::GetEnvironmentVariable("Path", "Machine")
-```
-
-### Interfaz Python (ventana_usuarios.py)
-- Ventana maximizada con sidebar de navegación (5 opciones)
-- Panel **Todos los Usuarios**: tabla + detalle expandible con 30 campos
-- Panel **Invitar a VIP**: tarjetas con botón de invitación
-- Panel **Personas a Retener**: tarjetas con bono de retorno
-- Panel **Personas a Cuidar**: alertas automáticas + botones de acción
-- Panel **Servicio Rápido**: prioridades + atención rápida
-- Colores rojos análogos minimalistas (fondo gris claro, sidebar rojo oscuro, acentos rojos)
-- 6 jugadores mock con datos completos
-- Sin conexión a Prolog aún (datos hardcodeados)
-
----
-
-## ❌ LO QUE FALTA HACER
-
-### 1. Rellenar archivos Prolog (hechos + reglas)
-
-**hechos.pl:** Convertir los 6 jugadores mock de Python a hechos Prolog usando los 6 predicados definidos:
 ```prolog
-jugador(+Id, +Nombre, +Edad, +Ocupacion).
-economia(+Id, +PresupuestoHoy, +FichasActuales, +GastoHoy,
-         +GastoPromedioRonda, +GastoMaximoHistorico,
-         +PerdidasAcumuladas, +GananciasAcumuladas).
-comportamiento(+Id, +TipoPreferido, +RitmoPreferido,
-               +CambiaAlPerder, +CambiaAlGanar,
-               +ReinvierteGanancias, +JuegaSolo,
-               +AceptaRecomendaciones).
-sesion(+Id, +JuegoActual, +MontoApuesta, +ResultadoUltimaRonda,
-        +RondasJugadasHoy, +HorasEnCasinoHoy, +HoraActual).
-visitas(+Id, +FrecuenciaSemanal, +TiempoPromedio, +HorarioHabitual,
-         +DiasFavoritos, +TotalVisitas, +DiasDesdePrimeraVisita,
-         +DiasDesdeUltimaVisita).
-preferencias(+Id, +JuegoFavorito, +VariedadProbada).
-```
-
-**reglas_vip.pl:** 
-```prolog
+% Un jugador es VIP si visita >= 3 veces por semana
 vip(Id) :- visitas(Id, Freq, _, _, _, _, _, _), Freq >= 3.
+
+% O si su gasto máximo histórico es >= 100
 vip(Id) :- economia(Id, _, _, _, _, GastoMax, _, _), GastoMax >= 100.
-% + más reglas
 ```
 
-**reglas_retener.pl:**
-```prolog
-en_riesgo_irse(Id) :- visitas(Id, _, _, _, _, _, _, DiasUltima), DiasUltima > 30.
-```
+### Fragmento clave — Consulta pyswip desde Python
 
-**reglas_cuidar.pl** (o en reglas_detener.pl):
-```prolog
-detener_juego(Id) :- sesion(Id, _, _, _, _, Horas, _), Horas >= 4.
-```
-
-**reglas_recomendar.pl:**
-```prolog
-recomendar_juego(Id, tragamonedas) :- comportamiento(Id, azar, rapido, _, _, _, _, _).
-```
-
-### 2. Conectar Python con Prolog
-
-En `consultas.py` o directamente en `ventana_usuarios.py`, reemplazar los datos mock con consultas via pyswip:
 ```python
 from pyswip import Prolog
 prolog = Prolog()
 prolog.consult("../prolog/casino.pl")
-resultado = list(prolog.query("lista_vip(Lista)"))
+vips = list(prolog.query("lista_vip(Lista)"))
 ```
 
-### 3. Refinamientos
+### Fragmento clave — Análisis con pandas
 
-- Agregar más jugadores de prueba (8-10)
-- Agregar más reglas hasta completar 25+
-- Probar que al cambiar una regla en Prolog, el comportamiento de Python cambie
-- Preparar 3 casos de prueba para la presentación
+```python
+import pandas as pd
+import numpy as np
 
----
-
-## 🚀 CÓMO EJECUTAR (estado actual)
-
-```powershell
-# 1. Activar PATH correcto
-$env:Path = [Environment]::GetEnvironmentVariable("Path", "User") + ";"
-$env:Path += [Environment]::GetEnvironmentVariable("Path", "Machine")
-
-# 2. Ir a la carpeta
-cd C:\Users\yalli\OneDrive\Desktop\casino_sapiens\python
-
-# 3. Ejecutar
-python ventana_usuarios.py
+df = pd.DataFrame(datos_jugadores)
+gasto_por_clasificacion = df.groupby("clasificacion")["gasto_hoy"].mean()
+limite_perdidas = np.percentile(df["perdidas"], 75)
 ```
 
-Para verificar que pyswip funciona:
-```powershell
-python -c "from pyswip import Prolog; p = Prolog(); print('pyswip OK')"
-```
+### Fragmento clave — Python funcional
 
-Para verificar SWI-Prolog:
-```powershell
-& "$env:LOCALAPPDATA\Programs\SWI-Prolog\bin\swipl.exe" --version
+```python
+from functools import reduce
+
+vips = list(filter(lambda j: j["clasificacion"] == "VIP", jugadores))
+nombres_vip = list(map(lambda j: j["nombre"], vips))
+total = reduce(lambda acc, j: acc + j["gasto_hoy"], jugadores, 0)
 ```
 
 ---
 
-## 🧠 TEMAS DEL SÍLABO CUBIERTOS
+## 🧪 Pruebas
 
-| Tema | Dónde se aplicará |
-|---|---|
-| Átomos, constantes | `tragamonedas`, `VIP`, `j1` en hechos Prolog |
-| Predicados | `jugador/4`, `vip/1`, `recomendar_juego/2` |
-| Reglas | Todo en `reglas_*.pl` con `:-` |
-| Unificación | Prolog matchea consultas como `recomendar_juego(j1, X)` |
-| Control de ejecución | Orden de reglas, uso de `!` (cut) si necesario |
-| Listas | `findall` para listar VIPs, lista de días de visita |
-| Indeterminismo | Múltiples reglas que pueden aplicar al mismo jugador |
-| Python: clases | `AplicacionCasino`, paneles como clases |
-| Python: tkinter | Interfaz gráfica completa |
+El sistema incluye 16 pruebas unitarias en `python/tests/test_clasificaciones.py`:
 
----
+| Grupo | Pruebas | Verifica |
+|---|---|---|
+| TestJugadores | 6 | Datos completos, clasificaciones válidas, existencia |
+| TestAnalisis | 6 | DataFrame, groupby, filter, map, reduce, resumen |
+| TestFuncional | 4 | Demostración de filter, map, reduce, comprehensions |
 
-## 📝 NOTAS PARA CONTINUAR
-
-1. **No se usa Chocolatey** — no tiene permisos de admin. Todo se instaló manual.
-2. **El archivo principal de Python** es `ventana_usuarios.py` (no `main.py`).
-3. **Los archivos separados** (`ventana_vip.py`, `ventana_retener.py`, etc.) están vacíos — todo está dentro de `ventana_usuarios.py`.
-4. **Después de escribir Prolog**, migrar las consultas de datos mock a consultas pyswip.
-5. **La clasificación "Detener"** se renombró a "Cuidar" en la interfaz (enfoque más ético).
-6. **Para la presentación:** preparar 3 casos de prueba (principiante, VIP, riesgo) mostrando cómo cambiar una regla Prolog cambia el resultado.
+Ejecutar con:
+```bash
+cd python
+python -m pytest tests/ -v
+```
 
 ---
 
-*Última actualización: 05/06/2026*
+## 📊 Resultados
+
+### Dashboard
+- 8 jugadores registrados con datos completos
+- Clasificaciones: VIP, Retener, Cuidar, Servicio Rápido
+- KPIs en tiempo real: totales, financieros, distribución
+- Barras de progreso visuales para presupuesto y riesgo
+
+### Paneles Funcionales
+1. **Dashboard**: Vista general con KPIs y resumen financiero
+2. **Todos los Usuarios**: Tabla con detalle expandible (30 campos)
+3. **Invitar a VIP**: Tarjetas con datos clave + botón de invitación
+4. **Personas a Retener**: Tarjetas con indicador de riesgo + bono
+5. **Personas a Cuidar**: Alertas automáticas con código de colores
+6. **Servicio Rápido**: Prioridades + atención ágil
+7. **Estadísticas**: Análisis descriptivo, groupby, correlaciones, funcional
+
+### Análisis de Datos
+- Gasto promedio por clasificación (pandas groupby)
+- Matriz de correlación entre variables numéricas (numpy)
+- Top jugadores en percentil de pérdidas
+- Python funcional: map, filter, reduce aplicados a datos reales
+
+---
+
+## ✅ Conclusiones
+
+1. **Integración multiparadigma exitosa**: Se logró combinar Prolog (lógico), Python funcional (map/filter/reduce) y Python POO (clases) en un solo sistema cohesivo.
+
+2. **Motor de inferencia funcional**: Las 22+ reglas de Prolog clasifican correctamente a los jugadores según su perfil, y el cambio de una regla modifica el comportamiento del sistema sin tocar Python.
+
+3. **Dashboard profesional**: La interfaz oscura con acentos dorados ofrece una experiencia visual premium, con 7 paneles funcionales y navegación fluida.
+
+4. **Análisis de datos**: pandas y numpy permiten extraer patrones de comportamiento (correlación frecuencia-pérdidas, gasto promedio por clasificación) que serían difíciles de detectar manualmente.
+
+5. **Pruebas automatizadas**: 16 pruebas unitarias validan la integridad de los datos, las clasificaciones y las funciones de análisis.
+
+### Limitaciones
+- Los datos son estáticos (mock) cuando no hay conexión a Prolog.
+- No hay persistencia en base de datos.
+- Las visualizaciones gráficas (matplotlib) están planificadas para una versión futura.
+
+### Trabajo Futuro
+- Conexión a base de datos real para datos dinámicos.
+- Visualizaciones gráficas con matplotlib embebido en tkinter.
+- Módulo de recomendaciones en vivo basado en sesión actual.
+- Interfaz web con Flask o Django.
+
+---
+
+## 📚 Referencias
+
+- SWI-Prolog. (2024). *SWI-Prolog documentation*. https://www.swi-prolog.org
+- Yüce, B. (2024). *pyswip: Python-SWI-Prolog bridge*. https://github.com/yuce/pyswip
+- The pandas development team. (2024). *pandas documentation*. https://pandas.pydata.org
+- NumPy contributors. (2024). *NumPy documentation*. https://numpy.org
+- Python Software Foundation. (2024). *tkinter documentation*. https://docs.python.org/3/library/tkinter.html
+- Krekel, H. et al. (2024). *pytest documentation*. https://docs.pytest.org
+- Clocksin, W.F. & Mellish, C.S. (2003). *Programming in Prolog*. Springer.

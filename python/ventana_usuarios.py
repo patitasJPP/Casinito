@@ -1,9 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
 
-# ============================================================
-# DATOS: 30 campos por jugador (simulando datos de Prolog)
-# ============================================================
 JUGADORES = [
     {
         "id": "j1", "nombre": "Carlos", "edad": 45, "ocupacion": "Ingeniero",
@@ -97,118 +94,124 @@ JUGADORES = [
     },
 ]
 
-# ============================================================
-# COLORES: rojos análogos minimalistas
-# ============================================================
-C = {
-    "sidebar_fondo": "#1e0e0e",
-    "sidebar_texto": "#e8d5d0",
-    "sidebar_selected": "#b3382c",
-    "sidebar_hover": "#3d1c1c",
-    "fondo": "#f4f1ee",
+COLORES = {
+    "fondo": "#0a0a0f",
+    "sidebar": "#12121e",
+    "sidebar_hover": "#1e1e36",
+    "sidebar_selected": "#c9a84c",
+    "card_bg": "#16162a",
+    "card_alt": "#1c1c34",
     "blanco": "#ffffff",
-    "rojo_primario": "#c0392b",
-    "rojo_secundario": "#e74c3c",
-    "rojo_claro": "#fadbd8",
-    "rojo_oscuro": "#a93226",
-    "texto_principal": "#2c3e50",
-    "texto_secundario": "#7f8c8d",
-    "border": "#e0d8d4",
-    "success": "#27ae60",
-    "warning": "#e67e22",
-    "danger": "#c0392b",
+    "oro": "#c9a84c",
+    "oro_oscuro": "#a8882e",
+    "rojo": "#e94560",
+    "rojo_oscuro": "#c0392b",
+    "verde": "#2ecc71",
+    "verde_oscuro": "#1a9c54",
+    "naranja": "#f39c12",
+    "texto": "#e8e8f0",
+    "texto_sec": "#8888a0",
+    "texto_dim": "#5a5a70",
+    "border": "#2a2a44",
 }
 
-# ============================================================
-# APLICACIÓN PRINCIPAL
-# ============================================================
 class AplicacionCasino:
     def __init__(self):
         self.ventana = tk.Tk()
-        self.ventana.title("Casino Sapiens - Sistema de Gestión")
-        self.ventana.configure(bg=C["fondo"])
+        self.ventana.title("Casino Sapiens - Sistema Experto de Gestión")
+        self.ventana.configure(bg=COLORES["fondo"])
         ancho = self.ventana.winfo_screenwidth()
         alto = self.ventana.winfo_screenheight()
         self.ventana.geometry(f"{ancho}x{alto}+0+0")
         self.ventana.state("zoomed")
 
+        self._estilo = ttk.Style()
+        self._estilo.theme_use("clam")
+
         self.panel_actual = None
         self._crear_layout()
-        self._cargar_panel("todos")
+        self._cargar_panel("dashboard")
         self.ventana.mainloop()
 
-    # ----------------------------------------------------------
-    # Layout principal: barra + sidebar + contenido + barra_estado
-    # ----------------------------------------------------------
     def _crear_layout(self):
         self._crear_barra_superior()
-        self._frame_contenido = tk.Frame(self.ventana, bg=C["fondo"])
+        self._frame_contenido = tk.Frame(self.ventana, bg=COLORES["fondo"])
         self._frame_contenido.pack(fill=tk.BOTH, expand=True)
         self._crear_sidebar()
-        self._frame_paneles = tk.Frame(self._frame_contenido, bg=C["fondo"])
+        self._frame_paneles = tk.Frame(self._frame_contenido, bg=COLORES["fondo"])
         self._frame_paneles.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True)
         self._crear_barra_estado()
 
     def _crear_barra_superior(self):
-        barra = tk.Frame(self.ventana, bg=C["sidebar_fondo"], height=44)
+        barra = tk.Frame(self.ventana, bg="#08080c", height=48)
         barra.pack(fill=tk.X, side=tk.TOP)
-        tk.Label(barra, text="CASINO SAPIENS", bg=C["sidebar_fondo"],
-                 fg=C["rojo_claro"], font=("Segoe UI", 16, "bold")).pack(side=tk.LEFT, padx=20, pady=8)
-        tk.Label(barra, text="Sistema Experto de Gestión", bg=C["sidebar_fondo"],
-                 fg=C["sidebar_texto"], font=("Segoe UI", 10)).pack(side=tk.LEFT, padx=(0, 20), pady=8)
 
-        separador = tk.Frame(self.ventana, bg=C["rojo_primario"], height=3)
+        tk.Label(barra, text="◆  CASINO SAPIENS", bg="#08080c",
+                 fg=COLORES["oro"], font=("Segoe UI", 15, "bold")).pack(side=tk.LEFT, padx=22, pady=10)
+
+        tk.Label(barra, text="Sistema Experto de Perfilado", bg="#08080c",
+                 fg=COLORES["texto_sec"], font=("Segoe UI", 10)).pack(side=tk.LEFT, padx=(0, 20), pady=10)
+
+        separador = tk.Frame(self.ventana, bg=COLORES["oro"], height=2)
         separador.pack(fill=tk.X, side=tk.TOP)
 
     def _crear_sidebar(self):
-        self._sidebar = tk.Frame(self._frame_contenido, bg=C["sidebar_fondo"], width=220)
+        self._sidebar = tk.Frame(self._frame_contenido, bg=COLORES["sidebar"], width=230)
         self._sidebar.pack(side=tk.LEFT, fill=tk.Y)
         self._sidebar.pack_propagate(False)
 
-        tk.Label(self._sidebar, text="NAVEGACIÓN", bg=C["sidebar_fondo"],
-                 fg=C["sidebar_texto"], font=("Segoe UI", 9, "bold")).pack(pady=(20, 10))
+        tk.Label(self._sidebar, text="NAVEGACIÓN", bg=COLORES["sidebar"],
+                 fg=COLORES["texto_sec"], font=("Segoe UI", 8, "bold")).pack(pady=(22, 12))
 
         self._nav_btns = {}
         items = [
-            ("todos", "Todos los Usuarios"),
-            ("vip", "Invitar a VIP"),
-            ("retener", "Personas a Retener"),
-            ("cuidar", "Personas a Cuidar"),
-            ("rapido", "Servicio Rápido"),
+            ("dashboard", "  Dashboard"),
+            ("todos", "  Todos los Usuarios"),
+            ("vip", "  Invitar a VIP"),
+            ("retener", "  Personas a Retener"),
+            ("cuidar", "  Personas a Cuidar"),
+            ("rapido", "  Servicio Rápido"),
         ]
         for key, texto in items:
-            btn = tk.Button(self._sidebar, text=texto, anchor="w", padx=15,
-                            bg=C["sidebar_fondo"], fg=C["sidebar_texto"],
-                            font=("Segoe UI", 11), bd=0, relief="flat",
-                            activebackground=C["sidebar_hover"],
-                            activeforeground=C["rojo_claro"],
+            btn = tk.Button(self._sidebar, text=texto, anchor="w", padx=18,
+                            bg=COLORES["sidebar"], fg=COLORES["texto"],
+                            font=("Segoe UI", 10), bd=0, relief="flat",
+                            activebackground=COLORES["sidebar_hover"],
+                            activeforeground=COLORES["oro"],
                             command=lambda k=key: self._cargar_panel(k))
-            btn.pack(fill=tk.X, pady=2, padx=8)
-            btn.bind("<Enter>", lambda e, b=btn: b.configure(bg=C["sidebar_hover"]))
-            btn.bind("<Leave>", lambda e, b=btn: b.configure(bg=C["sidebar_fondo"]))
+            btn.pack(fill=tk.X, pady=1, padx=8)
+            btn.bind("<Enter>", lambda e, b=btn: b.configure(bg=COLORES["sidebar_hover"]))
+            btn.bind("<Leave>", lambda e, b=btn: b.configure(
+                bg=COLORES["sidebar_selected"] if b == self._nav_btns.get(self.panel_actual) else COLORES["sidebar"]))
             self._nav_btns[key] = btn
 
     def _crear_barra_estado(self):
-        barra = tk.Frame(self.ventana, bg=C["sidebar_fondo"], height=28)
+        barra = tk.Frame(self.ventana, bg="#08080c", height=30)
         barra.pack(fill=tk.X, side=tk.BOTTOM)
         total = len(JUGADORES)
         vips = sum(1 for j in JUGADORES if j["clasificacion"] == "VIP")
-        tk.Label(barra, text=f"Total: {total} jugadores  |  VIP: {vips}",
-                 bg=C["sidebar_fondo"], fg=C["sidebar_texto"],
-                 font=("Segoe UI", 9)).pack(side=tk.LEFT, padx=15, pady=3)
-        tk.Label(barra, text="Datos simulados | Prolog conectado próximamente",
-                 bg=C["sidebar_fondo"], fg=C["texto_secundario"],
-                 font=("Segoe UI", 9)).pack(side=tk.RIGHT, padx=15, pady=3)
+        retener = sum(1 for j in JUGADORES if j["clasificacion"] == "Retener")
+        cuidar = sum(1 for j in JUGADORES if j["clasificacion"] == "Cuidar")
 
-    # ----------------------------------------------------------
-    # Navegación: cargar panel según selección
-    # ----------------------------------------------------------
+        tk.Label(barra, text=f"● {total} jugadores  |  VIP: {vips}  |  Retener: {retener}  |  Cuidar: {cuidar}",
+                 bg="#08080c", fg=COLORES["texto_sec"],
+                 font=("Segoe UI", 9)).pack(side=tk.LEFT, padx=15, pady=4)
+        tk.Label(barra, text="◆ Casino Sapiens v2.0  |  Prolog + Python",
+                 bg="#08080c", fg=COLORES["texto_dim"],
+                 font=("Segoe UI", 9)).pack(side=tk.RIGHT, padx=15, pady=4)
+
     def _cargar_panel(self, key):
+        self.panel_actual = key
         for k, btn in self._nav_btns.items():
-            btn.configure(bg=C["sidebar_selected"] if k == key else C["sidebar_fondo"])
+            if k == key:
+                btn.configure(bg=COLORES["sidebar_selected"], fg="#12121e")
+            else:
+                btn.configure(bg=COLORES["sidebar"], fg=COLORES["texto"])
         for w in self._frame_paneles.winfo_children():
             w.destroy()
-        if key == "todos":
+        if key == "dashboard":
+            PanelDashboard(self._frame_paneles)
+        elif key == "todos":
             PanelTodos(self._frame_paneles)
         elif key == "vip":
             PanelVIP(self._frame_paneles)
@@ -223,56 +226,68 @@ class AplicacionCasino:
     def _obtener_por_clasificacion(clasif):
         return [j for j in JUGADORES if j["clasificacion"] == clasif]
 
+    @staticmethod
+    def _crear_progress(parent, valor, maximo, color, ancho=200):
+        pct = min(valor / maximo, 1.0) if maximo > 0 else 0
+        frame = tk.Frame(parent, bg=COLORES["card_bg"], height=6, width=ancho)
+        frame.pack_propagate(False)
+        fill = tk.Frame(frame, bg=color, height=6, width=int(ancho * pct))
+        fill.place(x=0, y=0)
+        return frame
 
-# ============================================================
-# PANEL BASE (utilidades compartidas)
-# ============================================================
+
 class PanelBase:
     @staticmethod
     def _crear_header(frame, titulo, subtitulo=""):
-        header = tk.Frame(frame, bg=C["blanco"], padx=25, pady=18)
-        header.pack(fill=tk.X)
-        tk.Label(header, text=titulo, bg=C["blanco"], fg=C["rojo_primario"],
-                 font=("Segoe UI", 18, "bold")).pack(anchor="w")
+        header = tk.Frame(frame, bg=COLORES["card_bg"], padx=28, pady=20)
+        header.pack(fill=tk.X, pady=(0, 2))
+        tk.Label(header, text=titulo, bg=COLORES["card_bg"], fg=COLORES["oro"],
+                 font=("Segoe UI", 20, "bold")).pack(anchor="w")
         if subtitulo:
-            tk.Label(header, text=subtitulo, bg=C["blanco"], fg=C["texto_secundario"],
-                     font=("Segoe UI", 10)).pack(anchor="w", pady=(3, 0))
-
-    @staticmethod
-    def _crear_card(frame, titulo, valor, color=C["texto_principal"], ancho=180):
-        card = tk.Frame(frame, bg=C["blanco"], highlightbackground=C["border"],
-                        highlightthickness=1, padx=15, pady=12)
-        card.pack(side=tk.LEFT, padx=(0, 15), pady=10)
-        tk.Label(card, text=titulo, bg=C["blanco"], fg=C["texto_secundario"],
-                 font=("Segoe UI", 9)).pack(anchor="w")
-        tk.Label(card, text=str(valor), bg=C["blanco"], fg=color,
-                 font=("Segoe UI", 18, "bold")).pack(anchor="w")
-        return card
+            tk.Label(header, text=subtitulo, bg=COLORES["card_bg"], fg=COLORES["texto_sec"],
+                     font=("Segoe UI", 10)).pack(anchor="w", pady=(4, 0))
 
     @staticmethod
     def _crear_tag(clasif):
         etiquetas = {
-            "VIP": ("VIP", C["rojo_primario"]),
-            "Retener": ("Retener", C["warning"]),
-            "Cuidar": ("Cuidar", C["rojo_secundario"]),
-            "Servicio_Rapido": ("Rápido", C["success"]),
+            "VIP": ("VIP", COLORES["oro"]),
+            "Retener": ("Retener", COLORES["naranja"]),
+            "Cuidar": ("Cuidar", COLORES["rojo"]),
+            "Servicio_Rapido": ("Rápido", COLORES["verde"]),
         }
-        return etiquetas.get(clasif, (clasif, C["texto_secundario"]))
+        return etiquetas.get(clasif, (clasif, COLORES["texto_sec"]))
+
+    @staticmethod
+    def _crear_kpi_card(parent, icono, titulo, valor, color, desc=""):
+        card = tk.Frame(parent, bg=COLORES["card_bg"], padx=18, pady=14,
+                        highlightbackground=COLORES["border"], highlightthickness=1)
+        card.pack(side=tk.LEFT, padx=(0, 14), pady=8, ipadx=4)
+        top = tk.Frame(card, bg=COLORES["card_bg"])
+        top.pack(fill=tk.X)
+        tk.Label(top, text=icono, bg=COLORES["card_bg"], fg=color,
+                 font=("Segoe UI", 20)).pack(side=tk.LEFT, padx=(0, 10))
+        tk.Label(top, text=str(valor), bg=COLORES["card_bg"], fg=color,
+                 font=("Segoe UI", 26, "bold")).pack(side=tk.LEFT)
+        tk.Label(card, text=titulo, bg=COLORES["card_bg"], fg=COLORES["texto_sec"],
+                 font=("Segoe UI", 9)).pack(anchor="w", pady=(2, 0))
+        if desc:
+            tk.Label(card, text=desc, bg=COLORES["card_bg"], fg=COLORES["texto_dim"],
+                     font=("Segoe UI", 8)).pack(anchor="w")
+        return card
 
     @staticmethod
     def _detalle_jugador(frame, jugador):
-        """Muestra todos los 30 datos de un jugador en un panel lateral."""
-        detalle = tk.Frame(frame, bg=C["blanco"], highlightbackground=C["border"],
-                           highlightthickness=1)
-        detalle.pack(fill=tk.BOTH, expand=True, padx=25, pady=(0, 25))
+        detalle = tk.Frame(frame, bg=COLORES["card_bg"],
+                           highlightbackground=COLORES["border"], highlightthickness=1)
+        detalle.pack(fill=tk.BOTH, expand=True, padx=28, pady=(0, 28))
 
-        canvas = tk.Canvas(detalle, bg=C["blanco"], highlightthickness=0)
+        canvas = tk.Canvas(detalle, bg=COLORES["card_bg"], highlightthickness=0)
         scroll = ttk.Scrollbar(detalle, orient="vertical", command=canvas.yview)
         scroll.pack(side=tk.RIGHT, fill=tk.Y)
         canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
         canvas.configure(yscrollcommand=scroll.set)
 
-        interior = tk.Frame(canvas, bg=C["blanco"], padx=20, pady=15)
+        interior = tk.Frame(canvas, bg=COLORES["card_bg"], padx=22, pady=18)
         ventana = canvas.create_window((0, 0), window=interior, anchor="nw")
 
         def _configurar_inner(event):
@@ -281,15 +296,14 @@ class PanelBase:
 
         tag, color_tag = PanelBase._crear_tag(jugador["clasificacion"])
 
-        # Encabezado del detalle
-        enc = tk.Frame(interior, bg=C["blanco"])
+        enc = tk.Frame(interior, bg=COLORES["card_bg"])
         enc.pack(fill=tk.X, pady=(0, 15))
-        tk.Label(enc, text=f"{jugador['nombre']}", bg=C["blanco"],
-                 fg=C["texto_principal"], font=("Segoe UI", 16, "bold")).pack(side=tk.LEFT)
-        tk.Label(enc, text=tag, bg=color_tag, fg=C["blanco"],
-                 font=("Segoe UI", 9, "bold"), padx=10, pady=2).pack(side=tk.LEFT, padx=(10, 0))
+        tk.Label(enc, text=f"{jugador['nombre']}", bg=COLORES["card_bg"],
+                 fg=COLORES["texto"], font=("Segoe UI", 18, "bold")).pack(side=tk.LEFT)
+        lbl_tag = tk.Label(enc, text=tag, bg=color_tag, fg=COLORES["fondo"],
+                           font=("Segoe UI", 9, "bold"), padx=12, pady=3)
+        lbl_tag.pack(side=tk.LEFT, padx=(12, 0))
 
-        # Categorías de datos
         categorias = [
             ("Identificación", [
                 ("Edad", jugador["edad"]), ("Ocupación", jugador["ocupacion"])
@@ -336,55 +350,163 @@ class PanelBase:
         ]
 
         for cat_nombre, campos in categorias:
-            # Separador de categoría
-            sep = tk.Frame(interior, bg=C["border"], height=1)
-            sep.pack(fill=tk.X, pady=(5, 8))
-            tk.Label(interior, text=cat_nombre, bg=C["blanco"],
-                     fg=C["rojo_primario"], font=("Segoe UI", 10, "bold")).pack(anchor="w", pady=(0, 6))
-            grid = tk.Frame(interior, bg=C["blanco"])
+            sep = tk.Frame(interior, bg=COLORES["border"], height=1)
+            sep.pack(fill=tk.X, pady=(6, 10))
+            tk.Label(interior, text=cat_nombre, bg=COLORES["card_bg"],
+                     fg=COLORES["oro"], font=("Segoe UI", 10, "bold")).pack(anchor="w", pady=(0, 6))
+            grid = tk.Frame(interior, bg=COLORES["card_bg"])
             grid.pack(fill=tk.X)
             for i, (label, valor) in enumerate(campos):
                 fila = i // 3
                 col = i % 3
-                sub = tk.Frame(grid, bg=C["blanco"], padx=10, pady=3)
+                sub = tk.Frame(grid, bg=COLORES["card_bg"], padx=10, pady=3)
                 sub.grid(row=fila, column=col, sticky="w")
-                tk.Label(sub, text=label, bg=C["blanco"], fg=C["texto_secundario"],
+                tk.Label(sub, text=label, bg=COLORES["card_bg"], fg=COLORES["texto_sec"],
                          font=("Segoe UI", 9)).pack(anchor="w")
-                tk.Label(sub, text=str(valor), bg=C["blanco"], fg=C["texto_principal"],
-                         font=("Segoe UI", 11, "bold")).pack(anchor="w")
+                tk.Label(sub, text=str(valor), bg=COLORES["card_bg"], fg=COLORES["texto"],
+                         font=("Segoe UI", 12, "bold")).pack(anchor="w")
+
+        # Progress bar for budget usage
+        sep2 = tk.Frame(interior, bg=COLORES["border"], height=1)
+        sep2.pack(fill=tk.X, pady=(6, 10))
+        tk.Label(interior, text="Uso de Presupuesto", bg=COLORES["card_bg"],
+                 fg=COLORES["oro"], font=("Segoe UI", 10, "bold")).pack(anchor="w", pady=(0, 6))
+        pb_frame = tk.Frame(interior, bg=COLORES["card_bg"])
+        pb_frame.pack(fill=tk.X)
+        tk.Label(pb_frame, text="Hoy:", bg=COLORES["card_bg"], fg=COLORES["texto_sec"],
+                 font=("Segoe UI", 9)).pack(anchor="w")
+        pct = min(jugador["gasto_hoy"] / jugador["presupuesto_hoy"], 1.0) if jugador["presupuesto_hoy"] > 0 else 0
+        pb_color = COLORES["verde"] if pct < 0.5 else COLORES["naranja"] if pct < 0.8 else COLORES["rojo"]
+        bar_frame = tk.Frame(pb_frame, bg=COLORES["card_alt"], height=8, width=300)
+        bar_frame.pack(anchor="w", pady=(4, 0))
+        bar_fill = tk.Frame(bar_frame, bg=pb_color, height=8, width=int(300 * pct))
+        bar_fill.place(x=0, y=0)
+        tk.Label(pb_frame, text=f"{jugador['gasto_hoy']} / {jugador['presupuesto_hoy']} ({int(pct*100)}%)",
+                 bg=COLORES["card_bg"], fg=COLORES["texto_sec"],
+                 font=("Segoe UI", 9)).pack(anchor="w", pady=(4, 0))
 
 
-# ============================================================
-# PANEL: Todos los Usuarios
-# ============================================================
+class PanelDashboard:
+    def __init__(self, padre):
+        self.frame = tk.Frame(padre, bg=COLORES["fondo"])
+        self.frame.pack(fill=tk.BOTH, expand=True)
+
+        PanelBase._crear_header(self.frame, "Dashboard",
+                                "Resumen general del estado del casino y los jugadores.")
+
+        body = tk.Frame(self.frame, bg=COLORES["fondo"])
+        body.pack(fill=tk.BOTH, expand=True, padx=28, pady=(8, 28))
+
+        total = len(JUGADORES)
+        vips = len(AplicacionCasino._obtener_por_clasificacion("VIP"))
+        retener = len(AplicacionCasino._obtener_por_clasificacion("Retener"))
+        cuidar = len(AplicacionCasino._obtener_por_clasificacion("Cuidar"))
+        rapido = len(AplicacionCasino._obtener_por_clasificacion("Servicio_Rapido"))
+        total_gasto = sum(j["gasto_hoy"] for j in JUGADORES)
+        total_perdidas = sum(j["perdidas_acumuladas"] for j in JUGADORES)
+        total_ganancias = sum(j["ganancias_acumuladas"] for j in JUGADORES)
+
+        cards = tk.Frame(body, bg=COLORES["fondo"])
+        cards.pack(fill=tk.X, pady=(0, 20))
+
+        PanelBase._crear_kpi_card(cards, "👥", "Total Jugadores", total, COLORES["texto"])
+        PanelBase._crear_kpi_card(cards, "👑", "VIP", vips, COLORES["oro"],
+                                  f"{vips/total*100:.0f}% del total" if total > 0 else "")
+        PanelBase._crear_kpi_card(cards, "⚠️", "En Riesgo", retener, COLORES["naranja"])
+        PanelBase._crear_kpi_card(cards, "🛡️", "A Cuidar", cuidar, COLORES["rojo"])
+        PanelBase._crear_kpi_card(cards, "⚡", "Serv. Rápido", rapido, COLORES["verde"])
+        PanelBase._crear_kpi_card(cards, "💰", "Gasto Hoy", f"S/{total_gasto}", COLORES["texto"])
+
+        graf = tk.Frame(body, bg=COLORES["card_bg"],
+                        highlightbackground=COLORES["border"], highlightthickness=1)
+        graf.pack(fill=tk.X, pady=(0, 16))
+
+        tk.Label(graf, text="Distribución de Clasificaciones", bg=COLORES["card_bg"],
+                 fg=COLORES["texto"], font=("Segoe UI", 13, "bold")).pack(anchor="w", padx=20, pady=(14, 4))
+        tk.Label(graf, text="Proporción de cada tipo de jugador en el sistema",
+                 bg=COLORES["card_bg"], fg=COLORES["texto_sec"],
+                 font=("Segoe UI", 9)).pack(anchor="w", padx=20, pady=(0, 12))
+
+        barras = tk.Frame(graf, bg=COLORES["card_bg"])
+        barras.pack(fill=tk.X, padx=20, pady=(0, 18))
+
+        clasifs = [
+            ("VIP", vips, COLORES["oro"]),
+            ("Retener", retener, COLORES["naranja"]),
+            ("Cuidar", cuidar, COLORES["rojo"]),
+            ("Rápido", rapido, COLORES["verde"]),
+        ]
+        max_val = max((c[1] for c in clasifs), default=1)
+        for label, val, color in clasifs:
+            row = tk.Frame(barras, bg=COLORES["card_bg"])
+            row.pack(fill=tk.X, pady=3)
+            tk.Label(row, text=label, bg=COLORES["card_bg"], fg=COLORES["texto"],
+                     font=("Segoe UI", 10), width=10, anchor="w").pack(side=tk.LEFT)
+            bar_bg = tk.Frame(row, bg=COLORES["card_alt"], height=22, width=300)
+            bar_bg.pack(side=tk.LEFT, padx=(0, 10))
+            bar_w = int(300 * (val / max_val)) if max_val > 0 else 0
+            bar_fill = tk.Frame(bar_bg, bg=color, height=22, width=max(bar_w, 1) if bar_w > 0 else 0)
+            bar_fill.place(x=0, y=0)
+            tk.Label(row, text=str(val), bg=COLORES["card_bg"], fg=color,
+                     font=("Segoe UI", 12, "bold"), width=3).pack(side=tk.LEFT)
+
+        resumen = tk.Frame(body, bg=COLORES["card_bg"],
+                           highlightbackground=COLORES["border"], highlightthickness=1)
+        resumen.pack(fill=tk.X)
+
+        tk.Label(resumen, text="Resumen Financiero", bg=COLORES["card_bg"],
+                 fg=COLORES["texto"], font=("Segoe UI", 13, "bold")).pack(anchor="w", padx=20, pady=(14, 4))
+
+        fin_data = tk.Frame(resumen, bg=COLORES["card_bg"])
+        fin_data.pack(fill=tk.X, padx=20, pady=(8, 16))
+
+        cols = tk.Frame(fin_data, bg=COLORES["card_bg"])
+        cols.pack(fill=tk.X)
+        items_fin = [
+            ("Gasto Total Hoy", f"S/ {total_gasto}", COLORES["texto"]),
+            ("Pérdidas Totales", f"S/ {total_perdidas}", COLORES["rojo"]),
+            ("Ganancias Totales", f"S/ {total_ganancias}", COLORES["verde"]),
+            ("Balance", f"S/ {total_ganancias - total_perdidas}",
+             COLORES["verde"] if total_ganancias >= total_perdidas else COLORES["rojo"]),
+        ]
+        for i, (lbl, val, color) in enumerate(items_fin):
+            c = tk.Frame(cols, bg=COLORES["card_bg"], padx=12)
+            c.grid(row=0, column=i, sticky="w")
+            tk.Label(c, text=lbl, bg=COLORES["card_bg"], fg=COLORES["texto_sec"],
+                     font=("Segoe UI", 9)).pack(anchor="w")
+            tk.Label(c, text=val, bg=COLORES["card_bg"], fg=color,
+                     font=("Segoe UI", 16, "bold")).pack(anchor="w")
+
+
 class PanelTodos:
     def __init__(self, padre):
-        self.frame = tk.Frame(padre, bg=C["fondo"])
+        self.frame = tk.Frame(padre, bg=COLORES["fondo"])
         self.frame.pack(fill=tk.BOTH, expand=True)
         self.jugador_seleccionado = None
 
         PanelBase._crear_header(self.frame, "Todos los Usuarios",
-                                f"{len(JUGADORES)} jugadores registrados. Seleccione uno para ver detalles.")
+                                f"{len(JUGADORES)} jugadores registrados. Seleccione uno para ver detalles completos.")
         self._crear_contenido()
 
     def _crear_contenido(self):
-        body = tk.Frame(self.frame, bg=C["fondo"])
-        body.pack(fill=tk.BOTH, expand=True, padx=25, pady=(10, 0))
+        body = tk.Frame(self.frame, bg=COLORES["fondo"])
+        body.pack(fill=tk.BOTH, expand=True, padx=28, pady=(10, 0))
 
-        # Tabla con columnas principales
         columnas = ("Nombre", "Edad", "Ocupación", "Presupuesto", "Fichas",
                      "Gasto Hoy", "Juego Favorito", "Frecuencia", "Clasificación")
         self.tabla = ttk.Treeview(body, columns=columnas, show="headings", height=10)
 
-        style = ttk.Style()
-        style.theme_use("clam")
-        style.configure("Treeview", background=C["blanco"], foreground=C["texto_principal"],
-                        rowheight=32, fieldbackground=C["blanco"], font=("Segoe UI", 10))
-        style.configure("Treeview.Heading", background=C["rojo_primario"],
-                        foreground=C["blanco"], font=("Segoe UI", 10, "bold"))
-        style.map("Treeview", background=[("selected", C["rojo_claro"])],
-                  foreground=[("selected", C["rojo_oscuro"])])
-        style.map("Treeview.Heading", background=[("active", C["rojo_secundario"])])
+        self._estilo = ttk.Style()
+        self._estilo.configure("Treeview", background=COLORES["card_bg"],
+                               foreground=COLORES["texto"], rowheight=34,
+                               fieldbackground=COLORES["card_bg"], font=("Segoe UI", 10),
+                               bordercolor=COLORES["border"])
+        self._estilo.configure("Treeview.Heading", background=COLORES["sidebar"],
+                               foreground=COLORES["oro"], font=("Segoe UI", 10, "bold"),
+                               bordercolor=COLORES["border"])
+        self._estilo.map("Treeview", background=[("selected", COLORES["sidebar_hover"])],
+                         foreground=[("selected", COLORES["oro"])])
+        self._estilo.map("Treeview.Heading", background=[("active", COLORES["sidebar_hover"])])
 
         anchos = [100, 50, 100, 90, 70, 80, 120, 90, 110]
         for col, ancho in zip(columnas, anchos):
@@ -399,14 +521,9 @@ class PanelTodos:
                                       f"S/ {j['gasto_hoy']}", j["juego_favorito"],
                                       f"{j['frecuencia_semanal']}x/sem", tag),
                               tags=(j["id"],))
-            if j["clasificacion"] == "VIP":
-                self.tabla.tag_configure(j["id"], foreground=C["rojo_primario"])
-            elif j["clasificacion"] == "Retener":
-                self.tabla.tag_configure(j["id"], foreground=C["warning"])
-            elif j["clasificacion"] == "Cuidar":
-                self.tabla.tag_configure(j["id"], foreground=C["rojo_secundario"])
-            elif j["clasificacion"] == "Servicio_Rapido":
-                self.tabla.tag_configure(j["id"], foreground=C["success"])
+            color_tag = {"VIP": COLORES["oro"], "Retener": COLORES["naranja"],
+                         "Cuidar": COLORES["rojo"], "Servicio_Rapido": COLORES["verde"]}
+            self.tabla.tag_configure(j["id"], foreground=color_tag.get(j["clasificacion"], COLORES["texto"]))
 
         scroll_y = ttk.Scrollbar(body, orient=tk.VERTICAL, command=self.tabla.yview)
         scroll_x = ttk.Scrollbar(body, orient=tk.HORIZONTAL, command=self.tabla.xview)
@@ -418,17 +535,17 @@ class PanelTodos:
         body.grid_rowconfigure(0, weight=1)
         body.grid_columnconfigure(0, weight=1)
 
-        # Área de detalle: se llena al seleccionar una fila
-        self._frame_detalle = tk.Frame(body, bg=C["fondo"], height=300)
+        self._frame_detalle = tk.Frame(body, bg=COLORES["fondo"], height=300)
         self._frame_detalle.grid(row=2, column=0, columnspan=2, sticky="nsew", pady=(15, 0))
         body.grid_rowconfigure(2, weight=1)
 
         self.tabla.bind("<<TreeviewSelect>>", self._on_seleccionar)
 
-        # Mostrar detalle del primer jugador por defecto
         if JUGADORES:
-            self.tabla.selection_set(self.tabla.get_children()[0])
-            self._mostrar_detalle(JUGADORES[0])
+            children = self.tabla.get_children()
+            if children:
+                self.tabla.selection_set(children[0])
+                self._mostrar_detalle(JUGADORES[0])
 
     def _on_seleccionar(self, event):
         seleccion = self.tabla.selection()
@@ -446,42 +563,41 @@ class PanelTodos:
         PanelBase._detalle_jugador(self._frame_detalle, jugador)
 
 
-# ============================================================
-# PANEL: Invitar a VIP
-# ============================================================
 class PanelVIP:
     def __init__(self, padre):
-        self.frame = tk.Frame(padre, bg=C["fondo"])
+        self.frame = tk.Frame(padre, bg=COLORES["fondo"])
         self.frame.pack(fill=tk.BOTH, expand=True)
         vips = AplicacionCasino._obtener_por_clasificacion("VIP")
 
         PanelBase._crear_header(self.frame, "Invitar a VIP",
-                                f"{len(vips)} jugadores VIP. Clientes de alto valor que merecen atención especial.")
-        body = tk.Frame(self.frame, bg=C["fondo"])
-        body.pack(fill=tk.BOTH, expand=True, padx=25, pady=(10, 25))
+                                f"{len(vips)} jugadores de alto valor. Clientes premium que merecen atención exclusiva.")
+        body = tk.Frame(self.frame, bg=COLORES["fondo"])
+        body.pack(fill=tk.BOTH, expand=True, padx=28, pady=(10, 28))
 
         if not vips:
-            tk.Label(body, text="No hay jugadores VIP.", bg=C["fondo"],
-                     fg=C["texto_secundario"], font=("Segoe UI", 12)).pack()
+            tk.Label(body, text="No hay jugadores VIP en este momento.", bg=COLORES["fondo"],
+                     fg=COLORES["texto_sec"], font=("Segoe UI", 12)).pack()
             return
 
         for vip in vips:
             self._crear_tarjeta_vip(body, vip)
 
     def _crear_tarjeta_vip(self, padre, jugador):
-        card = tk.Frame(padre, bg=C["blanco"], highlightbackground=C["border"],
-                        highlightthickness=1, padx=20, pady=15)
-        card.pack(fill=tk.X, pady=(0, 10))
+        card = tk.Frame(padre, bg=COLORES["card_bg"],
+                        highlightbackground=COLORES["oro"], highlightthickness=1, padx=22, pady=16)
+        card.pack(fill=tk.X, pady=(0, 12))
 
-        superior = tk.Frame(card, bg=C["blanco"])
+        superior = tk.Frame(card, bg=COLORES["card_bg"])
         superior.pack(fill=tk.X)
+        tk.Label(superior, text="👑", bg=COLORES["card_bg"], fg=COLORES["oro"],
+                 font=("Segoe UI", 18)).pack(side=tk.LEFT, padx=(0, 8))
+        tk.Label(superior, text=jugador["nombre"], bg=COLORES["card_bg"],
+                 fg=COLORES["oro"], font=("Segoe UI", 16, "bold")).pack(side=tk.LEFT)
+        lbl_tag = tk.Label(superior, text="VIP", bg=COLORES["oro"], fg=COLORES["fondo"],
+                           font=("Segoe UI", 9, "bold"), padx=12, pady=3)
+        lbl_tag.pack(side=tk.LEFT, padx=(10, 0))
 
-        tk.Label(superior, text=jugador["nombre"], bg=C["blanco"],
-                 fg=C["rojo_primario"], font=("Segoe UI", 14, "bold")).pack(side=tk.LEFT)
-        tk.Label(superior, text="👑 VIP", bg=C["rojo_primario"], fg=C["blanco"],
-                 font=("Segoe UI", 9, "bold"), padx=10, pady=2).pack(side=tk.LEFT, padx=(10, 0))
-
-        info = tk.Frame(card, bg=C["blanco"])
+        info = tk.Frame(card, bg=COLORES["card_bg"])
         info.pack(fill=tk.X, pady=(10, 0))
 
         datos = [
@@ -494,64 +610,64 @@ class PanelVIP:
             ("Juego Favorito", jugador["juego_favorito"]),
             ("Ganancias Acum.", f"S/ {jugador['ganancias_acumuladas']}"),
         ]
-
         for i, (label, valor) in enumerate(datos):
-            sub = tk.Frame(info, bg=C["blanco"], padx=8, pady=2)
+            sub = tk.Frame(info, bg=COLORES["card_bg"], padx=8, pady=2)
             sub.grid(row=i // 4, column=i % 4, sticky="w")
-            tk.Label(sub, text=label, bg=C["blanco"], fg=C["texto_secundario"],
+            tk.Label(sub, text=label, bg=COLORES["card_bg"], fg=COLORES["texto_sec"],
                      font=("Segoe UI", 8)).pack(anchor="w")
-            tk.Label(sub, text=str(valor), bg=C["blanco"], fg=C["texto_principal"],
+            tk.Label(sub, text=str(valor), bg=COLORES["card_bg"], fg=COLORES["texto"],
                      font=("Segoe UI", 11, "bold")).pack(anchor="w")
 
-        btn = tk.Button(card, text="📨 Invitar a Evento VIP",
-                        bg=C["rojo_primario"], fg=C["blanco"],
-                        font=("Segoe UI", 10, "bold"), bd=0, padx=15, pady=5,
-                        activebackground=C["rojo_secundario"],
-                        activeforeground=C["blanco"],
+        btn = tk.Button(card, text="Enviar Invitación VIP",
+                        bg=COLORES["oro"], fg=COLORES["fondo"],
+                        font=("Segoe UI", 10, "bold"), bd=0, padx=18, pady=6,
+                        activebackground=COLORES["oro_oscuro"],
+                        activeforeground=COLORES["fondo"],
+                        cursor="hand2",
                         command=lambda n=jugador["nombre"]: self._invitar(n))
-        btn.pack(anchor="e", pady=(10, 0))
+        btn.pack(anchor="e", pady=(12, 0))
 
     def _invitar(self, nombre):
         from tkinter import messagebox
         messagebox.showinfo("Invitación Enviada",
-                            f"Se ha enviado invitación VIP a {nombre}.")
+                            f"Se ha enviado la invitación VIP a {nombre}.")
 
 
-# ============================================================
-# PANEL: Personas a Retener
-# ============================================================
 class PanelRetener:
     def __init__(self, padre):
-        self.frame = tk.Frame(padre, bg=C["fondo"])
+        self.frame = tk.Frame(padre, bg=COLORES["fondo"])
         self.frame.pack(fill=tk.BOTH, expand=True)
         retener = AplicacionCasino._obtener_por_clasificacion("Retener")
 
         PanelBase._crear_header(self.frame, "Personas a Retener",
-                                f"{len(retener)} jugador(es) en riesgo de irse. Aplicar incentivos.")
-        body = tk.Frame(self.frame, bg=C["fondo"])
-        body.pack(fill=tk.BOTH, expand=True, padx=25, pady=(10, 25))
+                                f"{len(retener)} jugador(es) en riesgo de abandono. Aplicar incentivos para retenerlos.")
+        body = tk.Frame(self.frame, bg=COLORES["fondo"])
+        body.pack(fill=tk.BOTH, expand=True, padx=28, pady=(10, 28))
 
         if not retener:
-            tk.Label(body, text="No hay jugadores en riesgo de irse.", bg=C["fondo"],
-                     fg=C["texto_secundario"], font=("Segoe UI", 12)).pack()
+            tk.Label(body, text="No hay jugadores en riesgo de irse.", bg=COLORES["fondo"],
+                     fg=COLORES["texto_sec"], font=("Segoe UI", 12)).pack()
             return
 
         for j in retener:
             self._crear_tarjeta_retener(body, j)
 
     def _crear_tarjeta_retener(self, padre, jugador):
-        card = tk.Frame(padre, bg=C["blanco"], highlightbackground=C["warning"],
-                        highlightthickness=1, padx=20, pady=15)
-        card.pack(fill=tk.X, pady=(0, 10))
+        card = tk.Frame(padre, bg=COLORES["card_bg"],
+                        highlightbackground=COLORES["naranja"], highlightthickness=1, padx=22, pady=16)
+        card.pack(fill=tk.X, pady=(0, 12))
 
-        sup = tk.Frame(card, bg=C["blanco"])
+        sup = tk.Frame(card, bg=COLORES["card_bg"])
         sup.pack(fill=tk.X)
-        tk.Label(sup, text=jugador["nombre"], bg=C["blanco"],
-                 fg=C["texto_principal"], font=("Segoe UI", 14, "bold")).pack(side=tk.LEFT)
-        tk.Label(sup, text="⚠ Retener", bg=C["warning"], fg=C["blanco"],
-                 font=("Segoe UI", 9, "bold"), padx=10, pady=2).pack(side=tk.LEFT, padx=(10, 0))
+        tk.Label(sup, text="⚠️", bg=COLORES["card_bg"], fg=COLORES["naranja"],
+                 font=("Segoe UI", 16)).pack(side=tk.LEFT, padx=(0, 8))
+        tk.Label(sup, text=jugador["nombre"], bg=COLORES["card_bg"],
+                 fg=COLORES["texto"], font=("Segoe UI", 16, "bold")).pack(side=tk.LEFT)
+        lbl_tag = tk.Label(sup, text="Retener", bg=COLORES["naranja"], fg=COLORES["fondo"],
+                           font=("Segoe UI", 9, "bold"), padx=12, pady=3)
+        lbl_tag.pack(side=tk.LEFT, padx=(10, 0))
 
-        info = tk.Frame(card, bg=C["blanco"])
+        info = tk.Frame(card, bg=COLORES["card_bg"])
         info.pack(fill=tk.X, pady=(10, 0))
 
         datos = [
@@ -563,18 +679,33 @@ class PanelRetener:
             ("Perdidas Acum.", f"S/ {jugador['perdidas_acumuladas']}"),
         ]
         for i, (l, v) in enumerate(datos):
-            sub = tk.Frame(info, bg=C["blanco"], padx=8, pady=2)
+            sub = tk.Frame(info, bg=COLORES["card_bg"], padx=8, pady=2)
             sub.grid(row=i // 3, column=i % 3, sticky="w")
-            tk.Label(sub, text=l, bg=C["blanco"], fg=C["texto_secundario"],
+            tk.Label(sub, text=l, bg=COLORES["card_bg"], fg=COLORES["texto_sec"],
                      font=("Segoe UI", 8)).pack(anchor="w")
-            tk.Label(sub, text=v, bg=C["blanco"], fg=C["texto_principal"],
+            tk.Label(sub, text=v, bg=COLORES["card_bg"], fg=COLORES["texto"],
                      font=("Segoe UI", 11, "bold")).pack(anchor="w")
 
-        tk.Button(card, text="🎁 Ofrecer Bono de Retorno",
-                  bg=C["warning"], fg=C["blanco"], font=("Segoe UI", 10, "bold"),
-                  bd=0, padx=15, pady=5,
-                  activebackground=C["sidebar_hover"],
-                  command=lambda n=jugador["nombre"]: self._ofrecer_bono(n)).pack(anchor="e", pady=(10, 0))
+        # Días sin venir como progress bar
+        dias_max = 60
+        dias_pct = min(jugador["dias_desde_ultima_visita"] / dias_max, 1.0)
+        dias_frame = tk.Frame(card, bg=COLORES["card_bg"])
+        dias_frame.pack(fill=tk.X, pady=(8, 0))
+        tk.Label(dias_frame, text="Riesgo de pérdida:", bg=COLORES["card_bg"],
+                 fg=COLORES["texto_sec"], font=("Segoe UI", 9)).pack(anchor="w")
+        bar_bg = tk.Frame(dias_frame, bg=COLORES["card_alt"], height=8, width=300)
+        bar_bg.pack(anchor="w", pady=(3, 0))
+        color_riesgo = COLORES["verde"] if dias_pct < 0.3 else COLORES["naranja"] if dias_pct < 0.6 else COLORES["rojo"]
+        bar_fill = tk.Frame(bar_bg, bg=color_riesgo, height=8, width=int(300 * dias_pct))
+        bar_fill.place(x=0, y=0)
+
+        btn = tk.Button(card, text="Ofrecer Bono de Retorno",
+                        bg=COLORES["naranja"], fg=COLORES["fondo"],
+                        font=("Segoe UI", 10, "bold"), bd=0, padx=18, pady=6,
+                        activebackground=COLORES["sidebar_hover"],
+                        cursor="hand2",
+                        command=lambda n=jugador["nombre"]: self._ofrecer_bono(n))
+        btn.pack(anchor="e", pady=(12, 0))
 
     def _ofrecer_bono(self, nombre):
         from tkinter import messagebox
@@ -582,54 +713,52 @@ class PanelRetener:
                             f"Bono de retorno ofrecido a {nombre}.")
 
 
-# ============================================================
-# PANEL: Personas a Cuidar
-# ============================================================
 class PanelCuidar:
     def __init__(self, padre):
-        self.frame = tk.Frame(padre, bg=C["fondo"])
+        self.frame = tk.Frame(padre, bg=COLORES["fondo"])
         self.frame.pack(fill=tk.BOTH, expand=True)
         cuidar = AplicacionCasino._obtener_por_clasificacion("Cuidar")
 
         PanelBase._crear_header(self.frame, "Personas a Cuidar",
-                                f"{len(cuidar)} jugador(es) que requieren supervisión o límites.")
-        body = tk.Frame(self.frame, bg=C["fondo"])
-        body.pack(fill=tk.BOTH, expand=True, padx=25, pady=(10, 25))
+                                f"{len(cuidar)} jugador(es) que requieren supervisión. Intervenir para juego responsable.")
+        body = tk.Frame(self.frame, bg=COLORES["fondo"])
+        body.pack(fill=tk.BOTH, expand=True, padx=28, pady=(10, 28))
 
         if not cuidar:
-            tk.Label(body, text="No hay jugadores que requieran cuidado.", bg=C["fondo"],
-                     fg=C["texto_secundario"], font=("Segoe UI", 12)).pack()
+            tk.Label(body, text="No hay jugadores que requieran supervisión.", bg=COLORES["fondo"],
+                     fg=COLORES["texto_sec"], font=("Segoe UI", 12)).pack()
             return
 
         for j in cuidar:
             self._crear_tarjeta_cuidar(body, j)
 
     def _crear_tarjeta_cuidar(self, padre, jugador):
-        card = tk.Frame(padre, bg=C["blanco"], highlightbackground=C["rojo_secundario"],
-                        highlightthickness=1, padx=20, pady=15)
-        card.pack(fill=tk.X, pady=(0, 10))
+        card = tk.Frame(padre, bg=COLORES["card_bg"],
+                        highlightbackground=COLORES["rojo"], highlightthickness=1, padx=22, pady=16)
+        card.pack(fill=tk.X, pady=(0, 12))
 
-        sup = tk.Frame(card, bg=C["blanco"])
+        sup = tk.Frame(card, bg=COLORES["card_bg"])
         sup.pack(fill=tk.X)
-        tk.Label(sup, text=jugador["nombre"], bg=C["blanco"],
-                 fg=C["texto_principal"], font=("Segoe UI", 14, "bold")).pack(side=tk.LEFT)
-        tk.Label(sup, text="🛡 Cuidar", bg=C["rojo_secundario"], fg=C["blanco"],
-                 font=("Segoe UI", 9, "bold"), padx=10, pady=2).pack(side=tk.LEFT, padx=(10, 0))
+        tk.Label(sup, text="🛡️", bg=COLORES["card_bg"], fg=COLORES["rojo"],
+                 font=("Segoe UI", 16)).pack(side=tk.LEFT, padx=(0, 8))
+        tk.Label(sup, text=jugador["nombre"], bg=COLORES["card_bg"],
+                 fg=COLORES["texto"], font=("Segoe UI", 16, "bold")).pack(side=tk.LEFT)
+        lbl_tag = tk.Label(sup, text="Cuidar", bg=COLORES["rojo"], fg=COLORES["blanco"],
+                           font=("Segoe UI", 9, "bold"), padx=12, pady=3)
+        lbl_tag.pack(side=tk.LEFT, padx=(10, 0))
 
         alertas = []
         if jugador["edad"] <= 22:
-            alertas.append("Edad joven - monitorear tiempo de juego")
+            alertas.append(("Edad joven", "Monitorear tiempo de juego", COLORES["rojo"]))
         if jugador["tiempo_en_casino_hoy"] >= 4:
-            alertas.append(f"Lleva {jugador['tiempo_en_casino_hoy']} hrs jugando - sugerir descanso")
+            alertas.append((f"Tiempo excesivo", f"{jugador['tiempo_en_casino_hoy']} hrs hoy - sugerir descanso", COLORES["rojo"]))
         if jugador["gasto_hoy"] >= jugador["presupuesto_hoy"] * 0.8:
-            alertas.append("Gastó más del 80% de su presupuesto - monitorear")
+            alertas.append(("Presupuesto agotado", "Gastó más del 80% - monitorear", COLORES["naranja"]))
         if jugador["perdidas_acumuladas"] > jugador["ganancias_acumuladas"] * 2:
-            alertas.append("Pérdidas acumuladas altas comparado a ganancias")
-        if not alertas:
-            alertas.append("Sin alertas críticas por ahora")
+            alertas.append(("Pérdidas altas", "Pérdidas superan ganancias significativamente", COLORES["naranja"]))
 
-        info = tk.Frame(card, bg=C["blanco"])
-        info.pack(fill=tk.X, pady=(5, 0))
+        info = tk.Frame(card, bg=COLORES["card_bg"])
+        info.pack(fill=tk.X, pady=(8, 0))
 
         datos = [
             ("Edad", jugador["edad"]),
@@ -637,32 +766,38 @@ class PanelCuidar:
             ("Presupuesto", f"S/ {jugador['presupuesto_hoy']}"),
             ("Gasto Hoy", f"S/ {jugador['gasto_hoy']}"),
             ("Rondas Hoy", jugador["rondas_jugadas_hoy"]),
-            ("Pérdidas Totales", f"S/ {jugador['perdidas_acumuladas']}"),
+            ("Perdidas Acum.", f"S/ {jugador['perdidas_acumuladas']}"),
         ]
         for i, (l, v) in enumerate(datos):
-            sub = tk.Frame(info, bg=C["blanco"], padx=8, pady=2)
+            sub = tk.Frame(info, bg=COLORES["card_bg"], padx=8, pady=2)
             sub.grid(row=i // 3, column=i % 3, sticky="w")
-            tk.Label(sub, text=l, bg=C["blanco"], fg=C["texto_secundario"],
+            tk.Label(sub, text=l, bg=COLORES["card_bg"], fg=COLORES["texto_sec"],
                      font=("Segoe UI", 8)).pack(anchor="w")
-            tk.Label(sub, text=v, bg=C["blanco"], fg=C["texto_principal"],
+            tk.Label(sub, text=v, bg=COLORES["card_bg"], fg=COLORES["texto"],
                      font=("Segoe UI", 11, "bold")).pack(anchor="w")
 
-        alert_frame = tk.Frame(card, bg=C["rojo_claro"], padx=12, pady=8)
-        alert_frame.pack(fill=tk.X, pady=(10, 0))
-        for alerta in alertas:
-            tk.Label(alert_frame, text=f"⚠ {alerta}", bg=C["rojo_claro"],
-                     fg=C["rojo_oscuro"], font=("Segoe UI", 9),
-                     anchor="w").pack(fill=tk.X)
+        if alertas:
+            alert_frame = tk.Frame(card, bg="#2a0a0a", padx=14, pady=10)
+            alert_frame.pack(fill=tk.X, pady=(10, 0))
+            for icono, msg, color in alertas:
+                row_a = tk.Frame(alert_frame, bg="#2a0a0a")
+                row_a.pack(fill=tk.X, pady=1)
+                tk.Label(row_a, text="●", bg="#2a0a0a", fg=color,
+                         font=("Segoe UI", 8)).pack(side=tk.LEFT, padx=(0, 6))
+                tk.Label(row_a, text=msg, bg="#2a0a0a", fg=COLORES["texto"],
+                         font=("Segoe UI", 9), anchor="w").pack(side=tk.LEFT)
 
-        btn_frame = tk.Frame(card, bg=C["blanco"])
+        btn_frame = tk.Frame(card, bg=COLORES["card_bg"])
         btn_frame.pack(fill=tk.X, pady=(10, 0))
-        tk.Button(btn_frame, text="🔇 Sugerir Descanso",
-                  bg=C["rojo_secundario"], fg=C["blanco"],
-                  font=("Segoe UI", 9, "bold"), bd=0, padx=12, pady=4,
+        tk.Button(btn_frame, text="Sugerir Descanso",
+                  bg=COLORES["rojo"], fg=COLORES["blanco"],
+                  font=("Segoe UI", 9, "bold"), bd=0, padx=14, pady=5,
+                  cursor="hand2",
                   command=lambda n=jugador["nombre"]: self._sugerir_descanso(n)).pack(side=tk.LEFT, padx=(0, 10))
-        tk.Button(btn_frame, text="📋 Registrar Intervención",
-                  bg=C["texto_secundario"], fg=C["blanco"],
-                  font=("Segoe UI", 9), bd=0, padx=12, pady=4,
+        tk.Button(btn_frame, text="Registrar Intervención",
+                  bg=COLORES["texto_dim"], fg=COLORES["texto"],
+                  font=("Segoe UI", 9), bd=0, padx=14, pady=5,
+                  cursor="hand2",
                   command=lambda n=jugador["nombre"]: self._registrar_intervencion(n)).pack(side=tk.LEFT)
 
     def _sugerir_descanso(self, nombre):
@@ -676,39 +811,39 @@ class PanelCuidar:
                             f"Intervención con {nombre} registrada en el sistema.")
 
 
-# ============================================================
-# PANEL: Servicio Rápido
-# ============================================================
 class PanelRapido:
     def __init__(self, padre):
-        self.frame = tk.Frame(padre, bg=C["fondo"])
+        self.frame = tk.Frame(padre, bg=COLORES["fondo"])
         self.frame.pack(fill=tk.BOTH, expand=True)
         rapidos = AplicacionCasino._obtener_por_clasificacion("Servicio_Rapido")
 
         PanelBase._crear_header(self.frame, "Servicio Rápido",
-                                f"{len(rapidos)} jugador(es) que prefieren atención ágil y eficiente.")
-        body = tk.Frame(self.frame, bg=C["fondo"])
-        body.pack(fill=tk.BOTH, expand=True, padx=25, pady=(10, 25))
+                                f"{len(rapidos)} jugador(es) que prefieren atención ágil. Priorizar su experiencia.")
+        body = tk.Frame(self.frame, bg=COLORES["fondo"])
+        body.pack(fill=tk.BOTH, expand=True, padx=28, pady=(10, 28))
 
         if not rapidos:
-            tk.Label(body, text="No hay jugadores para servicio rápido.", bg=C["fondo"],
-                     fg=C["texto_secundario"], font=("Segoe UI", 12)).pack()
+            tk.Label(body, text="No hay jugadores para servicio rápido.", bg=COLORES["fondo"],
+                     fg=COLORES["texto_sec"], font=("Segoe UI", 12)).pack()
             return
 
         for j in rapidos:
             self._crear_tarjeta_rapido(body, j)
 
     def _crear_tarjeta_rapido(self, padre, jugador):
-        card = tk.Frame(padre, bg=C["blanco"], highlightbackground=C["success"],
-                        highlightthickness=1, padx=20, pady=15)
-        card.pack(fill=tk.X, pady=(0, 10))
+        card = tk.Frame(padre, bg=COLORES["card_bg"],
+                        highlightbackground=COLORES["verde"], highlightthickness=1, padx=22, pady=16)
+        card.pack(fill=tk.X, pady=(0, 12))
 
-        sup = tk.Frame(card, bg=C["blanco"])
+        sup = tk.Frame(card, bg=COLORES["card_bg"])
         sup.pack(fill=tk.X)
-        tk.Label(sup, text=jugador["nombre"], bg=C["blanco"],
-                 fg=C["texto_principal"], font=("Segoe UI", 14, "bold")).pack(side=tk.LEFT)
-        tk.Label(sup, text="⚡ Rápido", bg=C["success"], fg=C["blanco"],
-                 font=("Segoe UI", 9, "bold"), padx=10, pady=2).pack(side=tk.LEFT, padx=(10, 0))
+        tk.Label(sup, text="⚡", bg=COLORES["card_bg"], fg=COLORES["verde"],
+                 font=("Segoe UI", 18)).pack(side=tk.LEFT, padx=(0, 8))
+        tk.Label(sup, text=jugador["nombre"], bg=COLORES["card_bg"],
+                 fg=COLORES["texto"], font=("Segoe UI", 16, "bold")).pack(side=tk.LEFT)
+        lbl_tag = tk.Label(sup, text="Rápido", bg=COLORES["verde"], fg=COLORES["fondo"],
+                           font=("Segoe UI", 9, "bold"), padx=12, pady=3)
+        lbl_tag.pack(side=tk.LEFT, padx=(10, 0))
 
         razones = []
         if jugador["prefiere_rapido_o_lento"] == "Rápido":
@@ -720,7 +855,7 @@ class PanelRapido:
         if jugador["presupuesto_hoy"] >= 200:
             razones.append("Presupuesto alto - agilizar atención")
 
-        info = tk.Frame(card, bg=C["blanco"])
+        info = tk.Frame(card, bg=COLORES["card_bg"])
         info.pack(fill=tk.X, pady=(10, 0))
 
         datos = [
@@ -732,26 +867,29 @@ class PanelRapido:
             ("Apuesta Prom.", f"S/ {jugador['gasto_promedio_ronda']}"),
         ]
         for i, (l, v) in enumerate(datos):
-            sub = tk.Frame(info, bg=C["blanco"], padx=8, pady=2)
+            sub = tk.Frame(info, bg=COLORES["card_bg"], padx=8, pady=2)
             sub.grid(row=i // 3, column=i % 3, sticky="w")
-            tk.Label(sub, text=l, bg=C["blanco"], fg=C["texto_secundario"],
+            tk.Label(sub, text=l, bg=COLORES["card_bg"], fg=COLORES["texto_sec"],
                      font=("Segoe UI", 8)).pack(anchor="w")
-            tk.Label(sub, text=v, bg=C["blanco"], fg=C["texto_principal"],
+            tk.Label(sub, text=v, bg=COLORES["card_bg"], fg=COLORES["texto"],
                      font=("Segoe UI", 11, "bold")).pack(anchor="w")
 
-        razon_frame = tk.Frame(card, bg=C["blanco"], padx=8, pady=5)
-        razon_frame.pack(fill=tk.X, pady=(5, 0))
-        tk.Label(razon_frame, text="Prioridad:", bg=C["blanco"],
-                 fg=C["texto_secundario"], font=("Segoe UI", 9)).pack(anchor="w")
+        razon_frame = tk.Frame(card, bg=COLORES["card_alt"], padx=12, pady=8)
+        razon_frame.pack(fill=tk.X, pady=(8, 0))
+        tk.Label(razon_frame, text="Prioridades:", bg=COLORES["card_alt"],
+                 fg=COLORES["verde"], font=("Segoe UI", 9, "bold")).pack(anchor="w")
         for r in razones:
-            tk.Label(razon_frame, text=f"  • {r}", bg=C["blanco"],
-                     fg=C["texto_principal"], font=("Segoe UI", 10)).pack(anchor="w")
+            tk.Label(razon_frame, text=f"  ▶ {r}", bg=COLORES["card_alt"],
+                     fg=COLORES["texto"], font=("Segoe UI", 9)).pack(anchor="w")
 
-        tk.Button(card, text="⚡ Atender Prioritariamente",
-                  bg=C["success"], fg=C["blanco"], font=("Segoe UI", 10, "bold"),
-                  bd=0, padx=15, pady=5,
-                  activebackground=C["sidebar_hover"],
-                  command=lambda n=jugador["nombre"]: self._atender(n)).pack(anchor="e", pady=(10, 0))
+        btn = tk.Button(card, text="Atender Prioritariamente",
+                        bg=COLORES["verde"], fg=COLORES["fondo"],
+                        font=("Segoe UI", 10, "bold"), bd=0, padx=18, pady=6,
+                        activebackground=COLORES["verde_oscuro"],
+                        activeforeground=COLORES["fondo"],
+                        cursor="hand2",
+                        command=lambda n=jugador["nombre"]: self._atender(n))
+        btn.pack(anchor="e", pady=(12, 0))
 
     def _atender(self, nombre):
         from tkinter import messagebox
@@ -759,8 +897,5 @@ class PanelRapido:
                             f"Notificación enviada: atender a {nombre} con prioridad.")
 
 
-# ============================================================
-# PUNTO DE ENTRADA
-# ============================================================
 if __name__ == "__main__":
     AplicacionCasino()
