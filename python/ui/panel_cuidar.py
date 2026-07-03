@@ -94,8 +94,8 @@ class PanelCuidar:
 
     def _sugerir_descanso(self, nombre):
         from tkinter import messagebox
-        messagebox.showinfo("Descanso Sugerido",
-                            f"Notificaci\u00f3n enviada a {nombre}: sugerencia de descanso.")
+        messagebox.showwarning("Alerta de Juego Responsable",
+                                f"{nombre} ha estado jugando por mucho tiempo. Sugerencia de descanso enviada.")
 
     def _registrar_intervencion(self, nombre):
         from tkinter import messagebox

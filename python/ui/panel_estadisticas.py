@@ -2,29 +2,129 @@ import tkinter as tk
 from config import COLORES
 from ui.panel_base import PanelBase
 from data.jugadores import obtener_todos
-from data.analisis import crear_dataframe, analisis_por_clasificacion, correlaciones, resumen_estadistico, PANDAS_OK
+from data.analisis import (
+    crear_dataframe, analisis_por_clasificacion, correlaciones,
+    resumen_estadistico, calcular_promedio_gasto,
+    calcular_estadisticas_generales, ejercicio_array_notas,
+    ejercicio_ventas, PANDAS_OK
+)
 
 
 class PanelEstadisticas:
     def __init__(self, padre):
         self.frame = tk.Frame(padre, bg=COLORES["fondo"])
         self.frame.pack(fill=tk.BOTH, expand=True)
-        jugadores = obtener_todos()
-        self.df = crear_dataframe(jugadores)
-        self.stats = resumen_estadistico(jugadores)
+        self.jugadores = obtener_todos()
+        self.df = crear_dataframe(self.jugadores)
+        self.stats = resumen_estadistico(self.jugadores)
+        self.mostrar_metricas = {"gasto": True, "perdidas": True, "ganancias": True}
 
         PanelBase._crear_header(self.frame, "Estad\u00edsticas y An\u00e1lisis",
                                 "An\u00e1lisis descriptivo de los jugadores usando pandas y numpy.")
 
         body = PanelBase._crear_body_scroll(self.frame)
 
+        self._crear_selector_analisis(body)
         self._crear_tabla_resumen(body)
+        if PANDAS_OK:
+            self._crear_exploracion_inicial(body)
         self._crear_analisis_por_clasificacion(body)
         if PANDAS_OK:
             self._crear_correlaciones(body)
-        self._crear_funcional(body, jugadores)
+        if PANDAS_OK:
+            self._crear_ejercicios_numpy(body)
+        self._crear_funcional(body, self.jugadores)
         if PANDAS_OK:
             self._crear_graficos(body)
+
+    def _crear_selector_analisis(self, parent):
+        frame = PanelBase._crear_card_contenedor(parent, "Opciones de An\u00e1lisis")
+        opts = tk.Frame(frame, bg=COLORES["card_bg"])
+        opts.pack(fill=tk.X, pady=(0, 10))
+
+        self.tipo_analisis = tk.IntVar(value=1)
+        tk.Radiobutton(opts, text="An\u00e1lisis Individual", variable=self.tipo_analisis,
+                       value=1, bg=COLORES["card_bg"], fg=COLORES["texto"],
+                       selectcolor=COLORES["fondo"], activebackground=COLORES["card_bg"],
+                       activeforeground=COLORES["oro"],
+                       font=("Segoe UI", 10)).pack(side=tk.LEFT, padx=(0, 20))
+        tk.Radiobutton(opts, text="An\u00e1lisis Grupal", variable=self.tipo_analisis,
+                       value=2, bg=COLORES["card_bg"], fg=COLORES["texto"],
+                       selectcolor=COLORES["fondo"], activebackground=COLORES["card_bg"],
+                       activeforeground=COLORES["oro"],
+                       font=("Segoe UI", 10)).pack(side=tk.LEFT)
+
+        tk.Label(opts, text="  Mostrar:", bg=COLORES["card_bg"],
+                 fg=COLORES["texto_sec"], font=("Segoe UI", 10)).pack(side=tk.LEFT, padx=(30, 6))
+        self.cb_gasto = tk.IntVar(value=1)
+        tk.Checkbutton(opts, text="Gasto", variable=self.cb_gasto,
+                       bg=COLORES["card_bg"], fg=COLORES["texto"],
+                       selectcolor=COLORES["fondo"], activebackground=COLORES["card_bg"],
+                       activeforeground=COLORES["oro"],
+                       font=("Segoe UI", 10)).pack(side=tk.LEFT, padx=4)
+        self.cb_perdidas = tk.IntVar(value=1)
+        tk.Checkbutton(opts, text="P\u00e9rdidas", variable=self.cb_perdidas,
+                       bg=COLORES["card_bg"], fg=COLORES["texto"],
+                       selectcolor=COLORES["fondo"], activebackground=COLORES["card_bg"],
+                       activeforeground=COLORES["oro"],
+                       font=("Segoe UI", 10)).pack(side=tk.LEFT, padx=4)
+        self.cb_ganancias = tk.IntVar(value=1)
+        tk.Checkbutton(opts, text="Ganancias", variable=self.cb_ganancias,
+                       bg=COLORES["card_bg"], fg=COLORES["texto"],
+                       selectcolor=COLORES["fondo"], activebackground=COLORES["card_bg"],
+                       activeforeground=COLORES["oro"],
+                       font=("Segoe UI", 10)).pack(side=tk.LEFT, padx=4)
+
+        self.lbl_sel = tk.Label(opts, text="  [Individual] Gasto+S/ Perd+S/ Gan+S/",
+                                bg=COLORES["card_bg"], fg=COLORES["texto_sec"],
+                                font=("Segoe UI", 9))
+        self.lbl_sel.pack(side=tk.LEFT, padx=(10, 0))
+
+        def _actualizar_sel():
+            modo = "Individual" if self.tipo_analisis.get() == 1 else "Grupal"
+            partes = []
+            if self.cb_gasto.get(): partes.append("Gasto")
+            if self.cb_perdidas.get(): partes.append("Perd")
+            if self.cb_ganancias.get(): partes.append("Gan")
+            self.lbl_sel.config(text=f"  [{modo}] {'+'.join(partes) if partes else 'Ninguna'}")
+
+        self.tipo_analisis.trace_add("write", lambda *_: _actualizar_sel())
+        self.cb_gasto.trace_add("write", lambda *_: _actualizar_sel())
+        self.cb_perdidas.trace_add("write", lambda *_: _actualizar_sel())
+        self.cb_ganancias.trace_add("write", lambda *_: _actualizar_sel())
+
+    def _crear_exploracion_inicial(self, parent):
+        frame = PanelBase._crear_card_contenedor(parent, "Exploraci\u00f3n Inicial (pandas)")
+        txt = ""
+        txt += "df.head():\n" + self.df.head().to_string() + "\n\n"
+        import io
+        buf = io.StringIO()
+        self.df.info(buf=buf)
+        txt += "df.info():\n" + buf.getvalue() + "\n"
+        txt += "df.describe():\n" + self.df.describe().to_string()
+        txt_frame = tk.Frame(frame, bg=COLORES["card_alt"], padx=16, pady=10)
+        txt_frame.pack(fill=tk.X, padx=20, pady=(0, 14))
+        tk.Label(txt_frame, text=txt, bg=COLORES["card_alt"], fg=COLORES["texto"],
+                 font=("Consolas", 8), justify=tk.LEFT, anchor="w").pack(anchor="w")
+
+    def _crear_ejercicios_numpy(self, parent):
+        frame = PanelBase._crear_card_contenedor(parent, "Ejercicios con NumPy")
+        ej1 = ejercicio_array_notas(self.jugadores)
+        ej2 = ejercicio_ventas(self.jugadores)
+        txt = ""
+        txt += "Ejercicio 1 - Array de gastos:\n"
+        txt += f"  Promedio gasto: S/ {ej1.get('promedio_gasto', 'N/A')}\n"
+        txt += f"  Jugadores con gasto alto (>200): {ej1.get('jugadores_gasto_alto', 'N/A')}\n"
+        txt += f"  Gastos > 200: {ej1.get('gastos_mayores_200', [])}\n\n"
+        txt += "Ejercicio 5 - Array de 'ventas' (gasto_hoy):\n"
+        txt += f"  Total gasto hoy: S/ {ej2.get('total_gasto_hoy', 'N/A')}\n"
+        txt += f"  Promedio gasto hoy: S/ {ej2.get('promedio_gasto_hoy', 'N/A')}\n"
+        txt += f"  Mayor gastador: {ej2.get('mayor_gastador', 'N/A')}\n"
+        txt += f"  Menor gastador: {ej2.get('menor_gastador', 'N/A')}"
+        txt_frame = tk.Frame(frame, bg=COLORES["card_alt"], padx=16, pady=10)
+        txt_frame.pack(fill=tk.X, padx=20, pady=(0, 14))
+        tk.Label(txt_frame, text=txt, bg=COLORES["card_alt"], fg=COLORES["texto"],
+                 font=("Consolas", 9), justify=tk.LEFT, anchor="w").pack(anchor="w")
 
     def _crear_tabla_resumen(self, parent):
         frame = PanelBase._crear_card_contenedor(parent, "Estad\u00edsticas Descriptivas")

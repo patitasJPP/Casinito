@@ -72,14 +72,15 @@ class PanelBase:
 
     @staticmethod
     def _crear_card_contenedor(parent, titulo, subtitulo=""):
-        frame = tk.Frame(parent, bg=COLORES["card_bg"],
-                         highlightbackground=COLORES["border"], highlightthickness=1)
+        frame = tk.LabelFrame(parent, text=titulo, padx=20, pady=14,
+                              bg=COLORES["card_bg"], fg=COLORES["texto"],
+                              font=("Segoe UI", 13, "bold"),
+                              highlightbackground=COLORES["border"],
+                              highlightthickness=1)
         frame.pack(fill=tk.X, pady=(0, 16))
-        tk.Label(frame, text=titulo, bg=COLORES["card_bg"], fg=COLORES["texto"],
-                 font=("Segoe UI", 13, "bold")).pack(anchor="w", padx=20, pady=(14, 4))
         if subtitulo:
             tk.Label(frame, text=subtitulo, bg=COLORES["card_bg"], fg=COLORES["texto_sec"],
-                     font=("Segoe UI", 9)).pack(anchor="w", padx=20, pady=(0, 12))
+                     font=("Segoe UI", 9)).pack(anchor="w", pady=(0, 8))
         return frame
 
     @staticmethod

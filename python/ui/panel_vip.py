@@ -71,5 +71,8 @@ class PanelVIP:
 
     def _invitar(self, nombre):
         from tkinter import messagebox
-        messagebox.showinfo("Invitaci\u00f3n Enviada",
-                            f"Se ha enviado la invitaci\u00f3n VIP a {nombre}.")
+        confirmar = messagebox.askquestion("Confirmar Invitaci\u00f3n",
+                                            f"\u00bfEst\u00e1 seguro de enviar invitaci\u00f3n VIP a {nombre}?")
+        if confirmar == "yes":
+            messagebox.showinfo("Invitaci\u00f3n Enviada",
+                                f"Se ha enviado la invitaci\u00f3n VIP a {nombre}.")

@@ -82,5 +82,8 @@ class PanelRetener:
 
     def _ofrecer_bono(self, nombre):
         from tkinter import messagebox
-        messagebox.showinfo("Bono Ofrecido",
-                            f"Bono de retorno ofrecido a {nombre}.")
+        confirmar = messagebox.askquestion("Confirmar Bono",
+                                            f"\u00bfEst\u00e1 seguro de ofrecer bono de retorno a {nombre}?")
+        if confirmar == "yes":
+            messagebox.showinfo("Bono Ofrecido",
+                                f"Bono de retorno ofrecido a {nombre}.")

@@ -57,6 +57,82 @@ def correlaciones(df):
     return nums.corr().round(3)
 
 
+def calcular_promedio_gasto(jugadores):
+    if not jugadores:
+        return 0.0
+    gastos = [j["gasto_hoy"] for j in jugadores]
+    return sum(gastos) / len(gastos)
+
+
+def calcular_estadisticas_generales(jugadores):
+    if not jugadores:
+        return {"promedio_general": 0, "desviacion": 0, "maxima": 0, "minima": 0}
+    gastos = [j["gasto_hoy"] for j in jugadores]
+    if PANDAS_OK:
+            arr = np.array(gastos)
+            return {
+                "promedio_general": round(np.mean(arr), 2),
+                "desviacion": round(np.std(arr), 2),
+                "maxima": round(np.max(arr), 2),
+                "minima": round(np.min(arr), 2),
+            }
+    return _estadisticas_sin_numpy(gastos)
+
+
+def _estadisticas_sin_numpy(gastos):
+    total = sum(gastos)
+    n = len(gastos)
+    media = total / n
+    varianza = sum((x - media) ** 2 for x in gastos) / n
+    return {
+        "promedio_general": round(media, 2),
+        "desviacion": round(varianza ** 0.5, 2),
+        "maxima": round(max(gastos), 2),
+        "minima": round(min(gastos), 2),
+    }
+
+
+def ejercicio_array_notas(jugadores):
+    if not jugadores:
+        return {}
+    gastos = np.array([j["gasto_hoy"] for j in jugadores]) if PANDAS_OK else [j["gasto_hoy"] for j in jugadores]
+    if PANDAS_OK:
+        promedio = round(float(np.mean(gastos)), 2)
+        aprobados = int(np.sum(gastos > 200))
+        altos = list(map(float, gastos[gastos > 200]))
+    else:
+        promedio = round(sum(gastos) / len(gastos), 2)
+        aprobados = sum(1 for g in gastos if g > 200)
+        altos = [g for g in gastos if g > 200]
+    return {
+        "promedio_gasto": promedio,
+        "jugadores_gasto_alto": aprobados,
+        "gastos_mayores_200": altos,
+    }
+
+
+def ejercicio_ventas(jugadores):
+    if not jugadores:
+        return {}
+    gastos = np.array([j["gasto_hoy"] for j in jugadores]) if PANDAS_OK else [j["gasto_hoy"] for j in jugadores]
+    if PANDAS_OK:
+        total = float(np.sum(gastos))
+        max_idx = int(np.argmax(gastos))
+        min_idx = int(np.argmin(gastos))
+        promedio = float(np.mean(gastos))
+    else:
+        total = sum(gastos)
+        max_idx = gastos.index(max(gastos))
+        min_idx = gastos.index(min(gastos))
+        promedio = total / len(gastos)
+    return {
+        "total_gasto_hoy": round(total, 2),
+        "promedio_gasto_hoy": round(promedio, 2),
+        "mayor_gastador": jugadores[max_idx]["nombre"],
+        "menor_gastador": jugadores[min_idx]["nombre"],
+    }
+
+
 def filtrar_por_clasificacion(jugadores, clasif):
     return list(filter(lambda j: j["clasificacion"] == clasif, jugadores))
 

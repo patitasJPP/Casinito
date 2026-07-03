@@ -3,6 +3,7 @@ from tkinter import ttk
 from config import COLORES
 from ui.panel_base import PanelBase
 from data.jugadores import obtener_todos
+from modules.ventana_reporte import VentanaReporte
 
 
 class PanelTodos:
@@ -142,7 +143,16 @@ class PanelTodos:
         if jugador:
             self._mostrar_detalle(jugador)
 
+    def _abrir_reporte(self, jugador):
+        VentanaReporte(self.frame, jugador)
+
     def _mostrar_detalle(self, jugador):
         for w in self._frame_detalle.winfo_children():
             w.destroy()
         PanelBase._detalle_jugador(self._frame_detalle, jugador)
+        btn_reporte = tk.Button(self._frame_detalle, text="Abrir Reporte Detallado",
+                                bg=COLORES["oro"], fg=COLORES["fondo"],
+                                font=("Segoe UI", 10, "bold"), bd=0,
+                                padx=16, pady=6, cursor="hand2",
+                                command=lambda j=jugador: self._abrir_reporte(j))
+        btn_reporte.pack(pady=(8, 0))

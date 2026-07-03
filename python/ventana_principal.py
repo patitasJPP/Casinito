@@ -16,6 +16,11 @@ class AplicacionCasino:
         self.ventana = tk.Tk()
         self.ventana.title("Casino Sapiens - Sistema Experto de Gestión")
         self.ventana.configure(bg=COLORES["fondo"])
+        self.ventana.resizable(False, False)
+        try:
+            self.ventana.iconbitmap("assets/icono.ico")
+        except Exception:
+            pass
         ancho = self.ventana.winfo_screenwidth()
         alto = self.ventana.winfo_screenheight()
         self.ventana.geometry(f"{ancho}x{alto}+0+0")

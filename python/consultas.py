@@ -48,20 +48,19 @@ def obtener_datos_jugador(jugador_id):
     if p is None:
         return None
     q = list(p.query(
-        "datos_jugador(Id, Nombre, Edad, Ocupacion, "
-        "Presupuesto, Fichas, GastoHoy, GastoProm, GastoMax, "
-        "Perdidas, Ganancias, JuegoActual, MontoApuesta, Resultado, "
-        "RondasHoy, TiempoCasino, HoraActual, Frecuencia, TiempoProm, "
-        "Horario, TotalVisitas, DiasPrimera, DiasUltima, "
-        "JuegoFav, Variedad, PrefJuego, Ritmo, "
-        "CambiaPierde, CambiaGana, JuegaSolo, Reinvierte, AceptaRec)",
-        Id=jugador_id
+        f"datos_jugador({jugador_id}, Nombre, Edad, Ocupacion, "
+        f"Presupuesto, Fichas, GastoHoy, GastoProm, GastoMax, "
+        f"Perdidas, Ganancias, JuegoActual, MontoApuesta, Resultado, "
+        f"RondasHoy, TiempoCasino, HoraActual, Frecuencia, TiempoProm, "
+        f"Horario, TotalVisitas, DiasPrimera, DiasUltima, "
+        f"JuegoFav, Variedad, PrefJuego, Ritmo, "
+        f"CambiaPierde, CambiaGana, JuegaSolo, Reinvierte, AceptaRec)"
     ))
     if not q:
         return None
     r = q[0]
     return {
-        "id": r["Id"], "nombre": r["Nombre"], "edad": r["Edad"],
+        "id": jugador_id, "nombre": r["Nombre"], "edad": r["Edad"],
         "ocupacion": r["Ocupacion"], "presupuesto_hoy": r["Presupuesto"],
         "fichas_actuales": r["Fichas"], "gasto_hoy": r["GastoHoy"],
         "gasto_promedio_ronda": r["GastoProm"],
