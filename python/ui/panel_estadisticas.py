@@ -1,12 +1,10 @@
 import tkinter as tk
 from config import COLORES
 from ui.panel_base import PanelBase
-from data.jugadores import obtener_todos
+from data.jugadores import obtener_todos, VIP, RETENER, CUIDAR, SERVICIO_RAPIDO
 from data.analisis import (
-    crear_dataframe, analisis_por_clasificacion, correlaciones,
-    resumen_estadistico, calcular_promedio_gasto,
-    calcular_estadisticas_generales, ejercicio_array_notas,
-    ejercicio_ventas, PANDAS_OK
+    crear_dataframe, analisis_por_clasificacion,
+    resumen_estadistico, PANDAS_OK
 )
 
 
@@ -15,209 +13,160 @@ class PanelEstadisticas:
         self.frame = tk.Frame(padre, bg=COLORES["fondo"])
         self.frame.pack(fill=tk.BOTH, expand=True)
         self.jugadores = obtener_todos()
-        self.df = crear_dataframe(self.jugadores)
         self.stats = resumen_estadistico(self.jugadores)
-        self.mostrar_metricas = {"gasto": True, "perdidas": True, "ganancias": True}
+        self.df = crear_dataframe(self.jugadores) if PANDAS_OK else None
 
-        PanelBase._crear_header(self.frame, "Estad\u00edsticas y An\u00e1lisis",
-                                "An\u00e1lisis descriptivo de los jugadores usando pandas y numpy.")
+        PanelBase._crear_header(self.frame, "Estad\u00edsticas del Casino",
+                                "M\u00e9tricas clave y comparativas por clasificaci\u00f3n de jugadores.")
 
         body = PanelBase._crear_body_scroll(self.frame)
 
-        self._crear_selector_analisis(body)
-        self._crear_tabla_resumen(body)
-        if PANDAS_OK:
-            self._crear_exploracion_inicial(body)
-        self._crear_analisis_por_clasificacion(body)
-        if PANDAS_OK:
-            self._crear_correlaciones(body)
-        if PANDAS_OK:
-            self._crear_ejercicios_numpy(body)
-        self._crear_funcional(body, self.jugadores)
-        if PANDAS_OK:
+        self._crear_resumen_general(body)
+        self._crear_comparativa_clasificacion(body)
+        self._crear_top_gastadores(body)
+        if PANDAS_OK and self.df is not None:
             self._crear_graficos(body)
 
-    def _crear_selector_analisis(self, parent):
-        frame = PanelBase._crear_card_contenedor(parent, "Opciones de An\u00e1lisis")
-        opts = tk.Frame(frame, bg=COLORES["card_bg"])
-        opts.pack(fill=tk.X, pady=(0, 10))
-
-        self.tipo_analisis = tk.IntVar(value=1)
-        tk.Radiobutton(opts, text="An\u00e1lisis Individual", variable=self.tipo_analisis,
-                       value=1, bg=COLORES["card_bg"], fg=COLORES["texto"],
-                       selectcolor=COLORES["fondo"], activebackground=COLORES["card_bg"],
-                       activeforeground=COLORES["oro"],
-                       font=("Segoe UI", 10)).pack(side=tk.LEFT, padx=(0, 20))
-        tk.Radiobutton(opts, text="An\u00e1lisis Grupal", variable=self.tipo_analisis,
-                       value=2, bg=COLORES["card_bg"], fg=COLORES["texto"],
-                       selectcolor=COLORES["fondo"], activebackground=COLORES["card_bg"],
-                       activeforeground=COLORES["oro"],
-                       font=("Segoe UI", 10)).pack(side=tk.LEFT)
-
-        tk.Label(opts, text="  Mostrar:", bg=COLORES["card_bg"],
-                 fg=COLORES["texto_sec"], font=("Segoe UI", 10)).pack(side=tk.LEFT, padx=(30, 6))
-        self.cb_gasto = tk.IntVar(value=1)
-        tk.Checkbutton(opts, text="Gasto", variable=self.cb_gasto,
-                       bg=COLORES["card_bg"], fg=COLORES["texto"],
-                       selectcolor=COLORES["fondo"], activebackground=COLORES["card_bg"],
-                       activeforeground=COLORES["oro"],
-                       font=("Segoe UI", 10)).pack(side=tk.LEFT, padx=4)
-        self.cb_perdidas = tk.IntVar(value=1)
-        tk.Checkbutton(opts, text="P\u00e9rdidas", variable=self.cb_perdidas,
-                       bg=COLORES["card_bg"], fg=COLORES["texto"],
-                       selectcolor=COLORES["fondo"], activebackground=COLORES["card_bg"],
-                       activeforeground=COLORES["oro"],
-                       font=("Segoe UI", 10)).pack(side=tk.LEFT, padx=4)
-        self.cb_ganancias = tk.IntVar(value=1)
-        tk.Checkbutton(opts, text="Ganancias", variable=self.cb_ganancias,
-                       bg=COLORES["card_bg"], fg=COLORES["texto"],
-                       selectcolor=COLORES["fondo"], activebackground=COLORES["card_bg"],
-                       activeforeground=COLORES["oro"],
-                       font=("Segoe UI", 10)).pack(side=tk.LEFT, padx=4)
-
-        self.lbl_sel = tk.Label(opts, text="  [Individual] Gasto+S/ Perd+S/ Gan+S/",
-                                bg=COLORES["card_bg"], fg=COLORES["texto_sec"],
-                                font=("Segoe UI", 9))
-        self.lbl_sel.pack(side=tk.LEFT, padx=(10, 0))
-
-        def _actualizar_sel():
-            modo = "Individual" if self.tipo_analisis.get() == 1 else "Grupal"
-            partes = []
-            if self.cb_gasto.get(): partes.append("Gasto")
-            if self.cb_perdidas.get(): partes.append("Perd")
-            if self.cb_ganancias.get(): partes.append("Gan")
-            self.lbl_sel.config(text=f"  [{modo}] {'+'.join(partes) if partes else 'Ninguna'}")
-
-        self.tipo_analisis.trace_add("write", lambda *_: _actualizar_sel())
-        self.cb_gasto.trace_add("write", lambda *_: _actualizar_sel())
-        self.cb_perdidas.trace_add("write", lambda *_: _actualizar_sel())
-        self.cb_ganancias.trace_add("write", lambda *_: _actualizar_sel())
-
-    def _crear_exploracion_inicial(self, parent):
-        frame = PanelBase._crear_card_contenedor(parent, "Exploraci\u00f3n Inicial (pandas)")
-        txt = ""
-        txt += "df.head():\n" + self.df.head().to_string() + "\n\n"
-        import io
-        buf = io.StringIO()
-        self.df.info(buf=buf)
-        txt += "df.info():\n" + buf.getvalue() + "\n"
-        txt += "df.describe():\n" + self.df.describe().to_string()
-        txt_frame = tk.Frame(frame, bg=COLORES["card_alt"], padx=16, pady=10)
-        txt_frame.pack(fill=tk.X, padx=20, pady=(0, 14))
-        tk.Label(txt_frame, text=txt, bg=COLORES["card_alt"], fg=COLORES["texto"],
-                 font=("Consolas", 8), justify=tk.LEFT, anchor="w").pack(anchor="w")
-
-    def _crear_ejercicios_numpy(self, parent):
-        frame = PanelBase._crear_card_contenedor(parent, "Ejercicios con NumPy")
-        ej1 = ejercicio_array_notas(self.jugadores)
-        ej2 = ejercicio_ventas(self.jugadores)
-        txt = ""
-        txt += "Ejercicio 1 - Array de gastos:\n"
-        txt += f"  Promedio gasto: S/ {ej1.get('promedio_gasto', 'N/A')}\n"
-        txt += f"  Jugadores con gasto alto (>200): {ej1.get('jugadores_gasto_alto', 'N/A')}\n"
-        txt += f"  Gastos > 200: {ej1.get('gastos_mayores_200', [])}\n\n"
-        txt += "Ejercicio 5 - Array de 'ventas' (gasto_hoy):\n"
-        txt += f"  Total gasto hoy: S/ {ej2.get('total_gasto_hoy', 'N/A')}\n"
-        txt += f"  Promedio gasto hoy: S/ {ej2.get('promedio_gasto_hoy', 'N/A')}\n"
-        txt += f"  Mayor gastador: {ej2.get('mayor_gastador', 'N/A')}\n"
-        txt += f"  Menor gastador: {ej2.get('menor_gastador', 'N/A')}"
-        txt_frame = tk.Frame(frame, bg=COLORES["card_alt"], padx=16, pady=10)
-        txt_frame.pack(fill=tk.X, padx=20, pady=(0, 14))
-        tk.Label(txt_frame, text=txt, bg=COLORES["card_alt"], fg=COLORES["texto"],
-                 font=("Consolas", 9), justify=tk.LEFT, anchor="w").pack(anchor="w")
-
-    def _crear_tabla_resumen(self, parent):
-        frame = PanelBase._crear_card_contenedor(parent, "Estad\u00edsticas Descriptivas")
+    def _crear_resumen_general(self, parent):
+        frame = PanelBase._crear_card_contenedor(parent, "Resumen General")
 
         grid = tk.Frame(frame, bg=COLORES["card_bg"])
         grid.pack(fill=tk.X, padx=20, pady=(0, 14))
 
         items = [
-            ("Edad Promedio", f"{self.stats['edad_promedio']} a\u00f1os"),
-            ("Gasto Promedio", f"S/ {self.stats['gasto_promedio']}"),
-            ("P\u00e9rdida Promedio", f"S/ {self.stats['perdida_promedio']}"),
-            ("Ganancia Promedio", f"S/ {self.stats['ganancia_promedio']}"),
-            ("Frecuencia Promedio", f"{self.stats['frecuencia_promedio']}x/sem"),
-            ("Balance Total", f"S/ {self.stats['balance']}"),
+            ("Total Jugadores", f"{len(self.jugadores)}", COLORES["texto"]),
+            ("Gasto Total Hoy", f"S/ {self.stats['gasto_promedio'] * len(self.jugadores):,.0f}", COLORES["oro"]),
+            ("Gasto Promedio", f"S/ {self.stats['gasto_promedio']}", COLORES["oro"]),
+            ("P\u00e9rdida Promedio", f"S/ {self.stats['perdida_promedio']}", COLORES["rojo"]),
+            ("Ganancia Promedio", f"S/ {self.stats['ganancia_promedio']}", COLORES["verde"]),
+            ("Balance Total", f"S/ {self.stats['balance']}", COLORES["verde"] if self.stats['balance'] >= 0 else COLORES["rojo"]),
+            ("Edad Promedio", f"{self.stats['edad_promedio']} a\u00f1os", COLORES["texto"]),
+            ("Frecuencia Prom.", f"{self.stats['frecuencia_promedio']}x/sem", COLORES["texto"]),
         ]
-        for i, (label, valor) in enumerate(items):
+        for i, (label, valor, color) in enumerate(items):
             c = tk.Frame(grid, bg=COLORES["card_bg"], padx=12, pady=4)
-            c.grid(row=i // 3, column=i % 3, sticky="w")
+            c.grid(row=i // 4, column=i % 4, sticky="w")
             tk.Label(c, text=label, bg=COLORES["card_bg"], fg=COLORES["texto_sec"],
-                     font=("Segoe UI", 9)).pack(anchor="w")
-            tk.Label(c, text=valor, bg=COLORES["card_bg"], fg=COLORES["texto"],
-                     font=("Segoe UI", 13, "bold")).pack(anchor="w")
+                     font=("Segoe UI", 8)).pack(anchor="w")
+            tk.Label(c, text=valor, bg=COLORES["card_bg"], fg=color,
+                     font=("Segoe UI", 14, "bold")).pack(anchor="w")
 
-    def _crear_analisis_por_clasificacion(self, parent):
+        clasifs = [
+            ("VIP", len(VIP), COLORES["oro"]),
+            ("Retener", len(RETENER), COLORES["naranja"]),
+            ("Cuidar", len(CUIDAR), COLORES["rojo"]),
+            ("Servicio R\u00e1pido", len(SERVICIO_RAPIDO), COLORES["verde"]),
+        ]
+        sep = tk.Frame(grid, bg=COLORES["border"], height=1)
+        sep.grid(row=2, column=0, columnspan=4, sticky="ew", pady=8)
+        for i, (nombre, cantidad, color) in enumerate(clasifs):
+            c = tk.Frame(grid, bg=COLORES["card_bg"], padx=12, pady=2)
+            c.grid(row=3, column=i, sticky="w")
+            tk.Label(c, text=nombre, bg=COLORES["card_bg"], fg=color,
+                     font=("Segoe UI", 9, "bold")).pack(anchor="w")
+            tk.Label(c, text=str(cantidad), bg=COLORES["card_bg"], fg=COLORES["texto"],
+                     font=("Segoe UI", 18, "bold")).pack(anchor="w")
+
+    def _crear_comparativa_clasificacion(self, parent):
         frame = PanelBase._crear_card_contenedor(
-            parent, "Agrupaci\u00f3n por Clasificaci\u00f3n (pandas groupby)"
+            parent, "Comparativa por Clasificaci\u00f3n"
         )
 
-        if not PANDAS_OK:
-            self._mostrar_mensaje_sin_pandas(frame)
-        else:
-            try:
-                agrupado = analisis_por_clasificacion(self.df)
-                texto = agrupado.to_string()
-            except Exception:
-                texto = "No hay suficientes datos para agrupar."
-
-            txt_frame = tk.Frame(frame, bg=COLORES["card_alt"], padx=16, pady=10)
-            txt_frame.pack(fill=tk.X, padx=20, pady=(0, 14))
-            tk.Label(txt_frame, text=texto, bg=COLORES["card_alt"], fg=COLORES["texto"],
-                     font=("Consolas", 9), justify=tk.LEFT, anchor="w").pack(anchor="w")
-
-    def _crear_correlaciones(self, parent):
-        frame = PanelBase._crear_card_contenedor(
-            parent, "Matriz de Correlaci\u00f3n (numpy)"
-        )
+        if not PANDAS_OK or self.df is None:
+            tk.Label(frame, text="Requiere pandas: pip install pandas",
+                     bg=COLORES["card_bg"], fg=COLORES["naranja"],
+                     font=("Segoe UI", 10)).pack(pady=10)
+            return
 
         try:
-            corr = correlaciones(self.df)
-            texto = corr.to_string()
+            agrupado = analisis_por_clasificacion(self.df)
         except Exception:
-            texto = "No hay suficientes datos num\u00e9ricos."
+            agrupado = None
 
-        txt_frame = tk.Frame(frame, bg=COLORES["card_alt"], padx=16, pady=10)
-        txt_frame.pack(fill=tk.X, padx=20, pady=(0, 14))
-        tk.Label(txt_frame, text=texto, bg=COLORES["card_alt"], fg=COLORES["texto"],
-                 font=("Consolas", 9), justify=tk.LEFT, anchor="w").pack(anchor="w")
+        if agrupado is None or agrupado.empty:
+            tk.Label(frame, text="No hay datos suficientes.",
+                     bg=COLORES["card_bg"], fg=COLORES["texto_sec"],
+                     font=("Segoe UI", 10)).pack(pady=10)
+            return
 
-    def _crear_funcional(self, parent, jugadores):
-        from functools import reduce
+        cols_mostrar = [("gasto_hoy", "mean"), ("perdidas", "mean"), ("ganancias", "mean")]
+        etiquetas = ["Gasto Prom.", "P\u00e9rdida Prom.", "Ganancia Prom."]
+        colores_fila = {
+            "VIP": COLORES["oro"],
+            "Retener": COLORES["naranja"],
+            "Cuidar": COLORES["rojo"],
+            "Servicio_Rapido": COLORES["verde"],
+        }
 
-        frame = PanelBase._crear_card_contenedor(
-            parent, "Python Funcional en Acci\u00f3n"
-        )
+        tabla = tk.Frame(frame, bg=COLORES["card_bg"])
+        tabla.pack(fill=tk.X, padx=20, pady=(0, 14))
 
-        vips = list(filter(lambda j: j["clasificacion"] == "VIP", jugadores))
-        nombres_vip = list(map(lambda j: j["nombre"], vips))
-        total_perdidas = reduce(lambda acc, j: acc + j["perdidas_acumuladas"], jugadores, 0)
-        total_ganancias = reduce(lambda acc, j: acc + j["ganancias_acumuladas"], jugadores, 0)
+        conteos = self.df["clasificacion"].value_counts()
+        encabezados = ["Clasificaci\u00f3n", "Cantidad"] + etiquetas
+        for j, h in enumerate(encabezados):
+            tk.Label(tabla, text=h, bg=COLORES["card_bg"], fg=COLORES["oro"],
+                     font=("Segoe UI", 10, "bold"), padx=12, pady=4,
+                     width=14 if j > 0 else 18, anchor="w").grid(row=0, column=j)
 
-        info_frame = tk.Frame(frame, bg=COLORES["card_alt"], padx=16, pady=10)
-        info_frame.pack(fill=tk.X, padx=20, pady=(0, 14))
+        for i, (clasif, row) in enumerate(agrupado.iterrows()):
+            color = colores_fila.get(clasif, COLORES["texto"])
+            bg_fila = COLORES["card_alt"] if i % 2 == 0 else COLORES["card_bg"]
+            tk.Label(tabla, text=clasif.replace("_", " "), bg=bg_fila, fg=color,
+                     font=("Segoe UI", 10, "bold"), padx=12, pady=3,
+                     width=18, anchor="w").grid(row=i + 1, column=0)
+            cant = int(conteos.get(clasif, 0))
+            tk.Label(tabla, text=str(cant), bg=bg_fila, fg=COLORES["texto"],
+                     font=("Segoe UI", 10), padx=12, pady=3,
+                     width=14, anchor="w").grid(row=i + 1, column=1)
+            for j, col in enumerate(cols_mostrar):
+                val = float(row[col])
+                texto = f"S/ {val:,.1f}"
+                tk.Label(tabla, text=texto, bg=bg_fila, fg=COLORES["texto"],
+                         font=("Segoe UI", 10), padx=12, pady=3,
+                         width=14, anchor="w").grid(row=i + 1, column=j + 2)
 
-        func_items = [
-            ("filter + lambda  VIPs", f"{', '.join(nombres_vip)}"),
-            ("map  Nombres VIP", f"{', '.join(nombres_vip)}"),
-            ("reduce  Total P\u00e9rdidas", f"S/ {total_perdidas}"),
-            ("reduce  Total Ganancias", f"S/ {total_ganancias}"),
-        ]
-        for label, valor in func_items:
-            row = tk.Frame(info_frame, bg=COLORES["card_alt"])
-            row.pack(fill=tk.X, pady=2)
-            tk.Label(row, text=label, bg=COLORES["card_alt"], fg=COLORES["texto_sec"],
-                     font=("Consolas", 9), width=30, anchor="w").pack(side=tk.LEFT)
-            tk.Label(row, text=valor, bg=COLORES["card_alt"], fg=COLORES["texto"],
-                     font=("Segoe UI", 10)).pack(side=tk.LEFT, padx=(10, 0))
+    def _crear_top_gastadores(self, parent):
+        frame = PanelBase._crear_card_contenedor(parent, "Top 10 Gastadores del D\u00eda")
+
+        ordenados = sorted(self.jugadores, key=lambda j: j["gasto_hoy"], reverse=True)[:10]
+
+        tabla = tk.Frame(frame, bg=COLORES["card_bg"])
+        tabla.pack(fill=tk.X, padx=20, pady=(0, 14))
+
+        colores_fila = {
+            "VIP": COLORES["oro"], "Retener": COLORES["naranja"],
+            "Cuidar": COLORES["rojo"], "Servicio_Rapido": COLORES["verde"],
+        }
+
+        encabezados = ["#", "Nombre", "Clasificaci\u00f3n", "Gasto Hoy", "Juego", "Frecuencia"]
+        anchos = [4, 20, 16, 12, 18, 12]
+        for j, h in enumerate(encabezados):
+            tk.Label(tabla, text=h, bg=COLORES["card_bg"], fg=COLORES["oro"],
+                     font=("Segoe UI", 10, "bold"), padx=10, pady=4,
+                     width=anchos[j], anchor="w").grid(row=0, column=j)
+
+        for i, j in enumerate(ordenados):
+            color = colores_fila.get(j["clasificacion"], COLORES["texto"])
+            bg_fila = COLORES["card_alt"] if i % 2 == 0 else COLORES["card_bg"]
+            valores = [
+                str(i + 1), j["nombre"],
+                j["clasificacion"].replace("_", " "),
+                f"S/ {j['gasto_hoy']}",
+                j["juego_favorito"],
+                f"{j['frecuencia_semanal']}x/sem",
+            ]
+            for k, v in enumerate(valores):
+                fg = color if k == 2 else COLORES["texto"]
+                tk.Label(tabla, text=v, bg=bg_fila, fg=fg,
+                         font=("Segoe UI", 10), padx=10, pady=3,
+                         width=anchos[k], anchor="w").grid(row=i + 1, column=k)
 
     def _crear_graficos(self, parent):
         from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
         from matplotlib.figure import Figure
 
         frame = PanelBase._crear_card_contenedor(
-            parent, "Visualizaci\u00f3n de Datos (matplotlib)"
+            parent, "Distribuci\u00f3n y Tendencias"
         )
 
         grid_graf = tk.Frame(frame, bg=COLORES["card_bg"])
@@ -249,16 +198,15 @@ class PanelEstadisticas:
         ax1.set_title("Distribuci\u00f3n de Clasificaciones", color="white", fontsize=11, pad=12)
 
         ax2 = fig.add_subplot(122)
-        orden = self.df.sort_values("gasto_hoy")
-        colores_barras = [COLORES["rojo"], COLORES["naranja"], COLORES["oro"],
-                          COLORES["verde"], COLORES["verde_oscuro"],
-                          COLORES["rojo_oscuro"], COLORES["naranja"], COLORES["oro"]]
-        ax2.barh(range(len(orden)), orden["gasto_hoy"].values,
-                 color=colores_barras[:len(orden)], edgecolor="none")
-        ax2.set_yticks(range(len(orden)))
-        ax2.set_yticklabels(orden["nombre"].values, color="white", fontsize=9)
+        top10 = self.df.nlargest(10, "gasto_hoy")
+        ax2.barh(range(len(top10)), top10["gasto_hoy"].values,
+                 color=[COLORES["oro"], COLORES["naranja"], COLORES["rojo"],
+                        COLORES["verde"], COLORES["verde_oscuro"]],
+                 edgecolor="none")
+        ax2.set_yticks(range(len(top10)))
+        ax2.set_yticklabels(top10["nombre"].values, color="white", fontsize=9)
         ax2.set_xlabel("Gasto Hoy (S/)", color="white", fontsize=10)
-        ax2.set_title("Gasto por Jugador", color="white", fontsize=11, pad=12)
+        ax2.set_title("Top 10 Gastadores", color="white", fontsize=11, pad=12)
         ax2.tick_params(colors="white")
         for spine in ax2.spines.values():
             spine.set_color(COLORES["border"])
@@ -266,13 +214,3 @@ class PanelEstadisticas:
         canvas = FigureCanvasTkAgg(fig, master=grid_graf)
         canvas.draw()
         canvas.get_tk_widget().pack(fill=tk.X)
-
-    def _mostrar_mensaje_sin_pandas(self, parent):
-        msg_frame = tk.Frame(parent, bg=COLORES["card_alt"], padx=16, pady=14)
-        msg_frame.pack(fill=tk.X, padx=20, pady=(0, 14))
-        tk.Label(msg_frame, text="pandas / numpy no disponibles",
-                 bg=COLORES["card_alt"], fg=COLORES["naranja"],
-                 font=("Segoe UI", 11, "bold")).pack(anchor="w")
-        tk.Label(msg_frame, text="Instala con: pip install pandas numpy",
-                 bg=COLORES["card_alt"], fg=COLORES["texto_sec"],
-                 font=("Consolas", 10)).pack(anchor="w", pady=(4, 0))
