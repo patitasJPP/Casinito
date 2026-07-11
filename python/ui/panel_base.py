@@ -86,6 +86,21 @@ class PanelBase:
         return frame
 
     @staticmethod
+    def _crear_grid_tarjetas(parent, jugadores, cols, fn_crear_tarjeta):
+        if not jugadores:
+            tk.Label(parent, text="No hay jugadores en esta categor\u00eda.", bg=COLORES["fondo"],
+                     fg=COLORES["texto_sec"], font=("Segoe UI", 12)).pack()
+            return
+        contenedor = tk.Frame(parent, bg=COLORES["fondo"])
+        contenedor.pack(fill=tk.X, padx=14, pady=8)
+        for i, j in enumerate(jugadores):
+            card = fn_crear_tarjeta(contenedor, j)
+            fila, col = i // cols, i % cols
+            card.grid(row=fila, column=col, padx=6, pady=6, sticky="nsew")
+        for c in range(cols):
+            contenedor.grid_columnconfigure(c, weight=1, uniform="card")
+
+    @staticmethod
     def _aplicar_hover_card(card, color_borde):
         card.bind("<Enter>", lambda e: card.configure(highlightbackground=color_borde))
         card.bind("<Leave>", lambda e: card.configure(highlightbackground=COLORES["border"]))

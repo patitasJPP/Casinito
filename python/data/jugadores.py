@@ -14552,3 +14552,9 @@ def obtener_todos():
 
 def obtener_por_clasificacion(jugadores, clasif):
     return [j for j in jugadores if j["clasificacion"] == clasif]
+#aqui vamos a precargar los datos asi que preparence malditos 
+
+VIP=obtener_por_clasificacion(obtener_todos(), "VIP")
+CUIDAR=obtener_por_clasificacion(obtener_todos(), "Cuidar")
+RETENER=obtener_por_clasificacion(obtener_todos(), "Retener")
+SERVICIO_RAPIDO=obtener_por_clasificacion(obtener_todos(), "Servicio_Rapido")
