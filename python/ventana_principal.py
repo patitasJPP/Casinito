@@ -12,8 +12,8 @@ from data.jugadores import obtener_todos
 
 class AplicacionCasino:
     def __init__(self):
-        configurar_estilos()
         self.ventana = tk.Tk()
+        configurar_estilos()
         self.ventana.title("Casino Sapiens - Sistema Experto de Gestión")
         self.ventana.configure(bg=COLORES["fondo"])
         self.ventana.resizable(False, False)

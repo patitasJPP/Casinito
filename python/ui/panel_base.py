@@ -30,7 +30,11 @@ class PanelBase:
         body = tk.Frame(parent, bg=COLORES["fondo"])
         body.pack(fill=tk.X)
 
+        _refreshing = [False]
         def _reflow(event=None):
+            if _refreshing[0]:
+                return
+            _refreshing[0] = True
             ancho_disp = parent.winfo_width() - 56
             cols = max(1, ancho_disp // ancho_card)
             for i, child in enumerate(body.winfo_children()):
@@ -38,13 +42,11 @@ class PanelBase:
                 row = i // cols
                 col = i % cols
                 child.grid(row=row, column=col, padx=(0, 14), pady=6, sticky="ew")
-                child.grid_propagate(False)
-                child.configure(width=ancho_card - 14)
             for c in range(cols):
                 body.grid_columnconfigure(c, weight=1)
+            _refreshing[0] = False
 
         parent.after(50, _reflow)
-        parent.bind("<Configure>", _reflow)
         for icono, titulo, valor, color, desc in cards_data:
             PanelBase._crear_kpi_card(body, icono, titulo, valor, color, desc)
 
@@ -82,6 +84,21 @@ class PanelBase:
             tk.Label(frame, text=subtitulo, bg=COLORES["card_bg"], fg=COLORES["texto_sec"],
                      font=("Segoe UI", 9)).pack(anchor="w", pady=(0, 8))
         return frame
+
+    @staticmethod
+    def _crear_grid_tarjetas(parent, jugadores, cols, fn_crear_tarjeta):
+        if not jugadores:
+            tk.Label(parent, text="No hay jugadores en esta categor\u00eda.", bg=COLORES["fondo"],
+                     fg=COLORES["texto_sec"], font=("Segoe UI", 12)).pack()
+            return
+        contenedor = tk.Frame(parent, bg=COLORES["fondo"])
+        contenedor.pack(fill=tk.X, padx=14, pady=8)
+        for i, j in enumerate(jugadores):
+            card = fn_crear_tarjeta(contenedor, j)
+            fila, col = i // cols, i % cols
+            card.grid(row=fila, column=col, padx=6, pady=6, sticky="nsew")
+        for c in range(cols):
+            contenedor.grid_columnconfigure(c, weight=1, uniform="card")
 
     @staticmethod
     def _aplicar_hover_card(card, color_borde):
